@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using REIstacks.Application.Contracts.Requests;
+using REIstacks.Application.Contracts.Responses;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Domain.Models;
 
@@ -174,10 +176,25 @@ public class BlogController : ControllerBase
     // POST: api/blog
     [HttpPost]
     [Authorize(Roles = "SuperAdmin")]
-    public async Task<ActionResult<BlogPost>> CreatePost([FromBody] BlogPost post)
+    public async Task<ActionResult<BlogPostResponse>> CreatePost([FromBody] CreateBlogPostRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        // Create domain entity from request
+        var post = new BlogPost
+        {
+            Title = request.Title,
+            Description = request.Description,
+            Content = request.Content,
+            Slug = request.Slug,
+            ImageUrl = request.ImageUrl ?? "",
+            OrganizationId = request.OrganizationId,
+            IsMainSiteBlog = request.IsMainSiteBlog,
+            IsPublished = request.IsPublished,
+            Author = request.Author,
+            CreatedAt = DateTime.UtcNow
+        };
 
         // For main site blogs, use the organization ID from claims if not provided
         if (post.IsMainSiteBlog && string.IsNullOrEmpty(post.OrganizationId))
@@ -189,13 +206,32 @@ public class BlogController : ControllerBase
         try
         {
             int id = await _blogRepository.AddPostAsync(post);
-            return CreatedAtAction(nameof(GetPostById), new { id }, post);
+
+            // Map domain entity to response
+            var response = new BlogPostResponse
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Description = post.Description,
+                Content = post.Content,
+                Slug = post.Slug,
+                ImageUrl = post.ImageUrl,
+                OrganizationId = post.OrganizationId,
+                IsMainSiteBlog = post.IsMainSiteBlog,
+                IsPublished = post.IsPublished,
+                Author = post.Author,
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt
+            };
+
+            return CreatedAtAction(nameof(GetPostById), new { id }, response);
         }
         catch (Exception ex)
         {
             return StatusCode(500, new { error = ex.Message });
         }
     }
+
     // PUT: api/blog/5
     [HttpPut("{id}")]
     [Authorize(Roles = "SuperAdmin")]

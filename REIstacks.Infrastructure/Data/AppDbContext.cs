@@ -33,6 +33,7 @@ public class AppDbContext : DbContext
     public DbSet<TemplateComponent> TemplateComponents { get; set; }
     public DbSet<LandingPageLead> LandingPageLeads { get; set; }
     public DbSet<LandingPages> LandingPages { get; set; }
+    public DbSet<LeadListFile> LeadListFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

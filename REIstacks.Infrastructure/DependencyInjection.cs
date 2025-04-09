@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using REIstacks.Application.Interfaces;
+using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Application.Services.Interfaces;
 using REIstacks.Application.Services.Users;
@@ -15,7 +16,9 @@ using REIstacks.Infrastructure.Repositories.Organizations;
 using REIstacks.Infrastructure.Repositories.Users;
 using REIstacks.Infrastructure.Services;
 using REIstacks.Infrastructure.Services.Authentication;
+using REIstacks.Infrastructure.Services.ListImport;
 using REIstacks.Infrastructure.Services.Organizations;
+using REIstacks.Infrastructure.Services.Storage;
 
 namespace REIstacks.Infrastructure;
 
@@ -43,7 +46,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        // Register repositories
+        // Register repositories and Services here
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
@@ -52,6 +55,7 @@ public static class DependencyInjection
         services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<IActivityLogger, ActivityLogger>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IStorageService, BlobStorageService>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IExternalAuthRepository, ExternalAuthRepository>();
         services.AddScoped<IDomainVerificationRepository, DomainVerificationRepository>();
@@ -61,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddHttpClient();
+        services.AddScoped<CsvImportService>();
         services.AddScoped<EventGridPublisher>(sp =>
         {
             var topicEndpoint = configuration["EventGrid:TopicEndpoint"];

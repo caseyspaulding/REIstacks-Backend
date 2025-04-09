@@ -1,5 +1,5 @@
-﻿using REIstacks.Application.Interfaces;
-
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using REIstacks.Application.Interfaces;
 namespace REIStacks.Api.Middleware
 {
     public class JwtCookieMiddleware
@@ -16,21 +16,26 @@ namespace REIStacks.Api.Middleware
         public async Task InvokeAsync(HttpContext context, ITokenService tokenService)
         {
             _logger.LogInformation("Entering JwtCookieMiddleware for path: {Path}", context.Request.Path);
-
             try
             {
                 // Check if the access_token cookie exists
                 if (context.Request.Cookies.TryGetValue("access_token", out var token))
                 {
-                    _logger.LogInformation("Found 'access_token' cookie: {Token}", token);
+                    _logger.LogInformation("Found 'access_token' cookie");
 
                     // Validate the token and get principal
                     var principal = tokenService.GetPrincipalFromExpiredToken(token);
 
-                    // Set the user
-                    context.User = principal;
+                    // Create a new identity using the cookie authentication scheme
+                    var identity = new System.Security.Claims.ClaimsIdentity(
+                        principal.Claims,
+                        CookieAuthenticationDefaults.AuthenticationScheme
+                    );
 
-                    var claimsInfo = string.Join(", ", principal.Claims.Select(c => $"{c.Type}={c.Value}"));
+                    // Set the user with the new identity
+                    context.User = new System.Security.Claims.ClaimsPrincipal(identity);
+
+                    var claimsInfo = string.Join(", ", context.User.Claims.Select(c => $"{c.Type}={c.Value}"));
                     _logger.LogInformation("Set user principal with claims: {Claims}", claimsInfo);
                 }
                 else
@@ -46,7 +51,6 @@ namespace REIStacks.Api.Middleware
 
             // Call the next middleware in the pipeline
             await _next(context);
-
             _logger.LogInformation("Exiting JwtCookieMiddleware for path: {Path}", context.Request.Path);
         }
     }

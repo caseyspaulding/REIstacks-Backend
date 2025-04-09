@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REIstacks.Api", "REIstacks.WebApi\REIstacks.Api.csproj", "{74F6F71B-ED01-48B3-8B71-87DBCE613E32}"
 EndProject
@@ -29,6 +29,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{AE65894D-2152-4A1F-B952-D10EFEEA5242}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{08D7EA17-C685-4F1C-99D3-F44609CEAA23}"
+	ProjectSection(SolutionItems) = preProject
+		Commands.MD = Commands.MD
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture", "architecture", "{73653C79-D206-4658-BDB1-E1804BDA41FE}"
 	ProjectSection(SolutionItems) = preProject

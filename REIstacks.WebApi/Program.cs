@@ -87,12 +87,9 @@ app.UseSwaggerUI();
 app.MapOpenApi();
 
 
-// Custom JWT middleware
-app.UseJwtCookieAuth();
-
-// Authentication and authorization
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseJwtCookieAuth();     // First process JWT
+app.UseAuthentication();    // Then standard auth
+app.UseAuthorization();     // Then authorization
 
 app.MapControllers();
 app.MapGet("/health", () => "Healthy");
