@@ -1,0 +1,6 @@
+@REIstacks.WebApi_HostAddress = http://localhost:5001
+
+GET {{REIstacks.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
