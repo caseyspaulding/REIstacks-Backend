@@ -61,5 +61,12 @@ public class Organization
     public virtual ICollection<Invitation> Invitations { get; set; } = new List<Invitation>();
     public virtual ICollection<StripeSubscription> StripeSubscriptions { get; set; } = new List<StripeSubscription>();
     public virtual ICollection<LandingPages> LandingPages { get; set; } = new List<LandingPages>();
+    public virtual ICollection<FieldMappingTemplate> FieldMappingTemplates { get; set; }
 
+    public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();
+    public virtual ICollection<Property> Properties { get; set; } = new List<Property>();
+    public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
+    public virtual ICollection<TaskItem> TaskItems { get; set; } = new List<TaskItem>();
+    public virtual ICollection<Communication> Communications { get; set; } = new List<Communication>();
+    public virtual ICollection<MarketingCampaign> MarketingCampaigns { get; set; } = new List<MarketingCampaign>();
 }

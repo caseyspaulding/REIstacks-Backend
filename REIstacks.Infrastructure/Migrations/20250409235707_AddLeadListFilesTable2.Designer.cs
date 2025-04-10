@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REIstacks.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using REIstacks.Infrastructure.Data;
 namespace REIstacks.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250409235707_AddLeadListFilesTable2")]
+    partial class AddLeadListFilesTable2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,122 +24,6 @@ namespace REIstacks.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("REIstack.Domain.Models.Contact", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AlternatePhone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("CallsMade")
-                        .HasColumnType("int");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("Clicks")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Company")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("ConsentEmailMarketing")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("ConsentTextMessages")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ContactType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastContacted")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("LeadSource")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("MessagesLeft")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Opens")
-                        .HasColumnType("int");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PreferredContactMethod")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("SMSResponses")
-                        .HasColumnType("int");
-
-                    b.Property<string>("State")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("StreetAddress")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Tags")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ZipCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId", "LastName", "FirstName");
-
-                    b.ToTable("contacts");
-                });
 
             modelBuilder.Entity("REIstack.Domain.Models.FieldMappingTemplate", b =>
                 {
@@ -513,16 +400,8 @@ namespace REIstacks.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal?>("ActualCost")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("Budget")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CampaignType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("Conversions")
                         .HasColumnType("int");
@@ -533,14 +412,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DealsGenerated")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("EndDate")
+                    b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
@@ -564,11 +436,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TargetCriteria")
+                    b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -1087,236 +955,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("blog_posts");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.CampaignContact", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LastContactedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.HasIndex("ContactId");
-
-                    b.ToTable("campaign_contacts");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Communication", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CommunicationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CommunicationType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DealId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Direction")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Subject")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("DealId");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("communications");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Deal", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("ActualClosingDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("ActualProfit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("ActualRehabCost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("AssignmentFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("BuyerContactId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ClosingDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ContractDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DealName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DealStage")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DealStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DealType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal?>("EstimatedProfit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ReasonForSelling")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("RehabBudget")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SellerContactId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Timeline")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BuyerContactId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("SellerContactId");
-
-                    b.HasIndex("OrganizationId", "DealStatus");
-
-                    b.ToTable("deals");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.DealDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BlobUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DealId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("DocumentType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DealId");
-
-                    b.ToTable("deal_documents");
-                });
-
             modelBuilder.Entity("REIstacks.Domain.Models.DomainVerification", b =>
                 {
                     b.Property<int>("Id")
@@ -1582,236 +1220,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("LandingPages");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.Property", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AcquisitionStrategy")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("Bathrooms")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Bedrooms")
-                        .HasColumnType("int");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("County")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("EstimatedARV")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("EstimatedRepairCost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.Property<decimal?>("ListPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("LotSize")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("OwnerContactId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PropertyCondition")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PropertyIssues")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PropertyStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PropertyType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal?>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("SellerAskingPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SquareFootage")
-                        .HasColumnType("int");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("StreetAddress")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("YearBuilt")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OwnerContactId");
-
-                    b.HasIndex("OrganizationId", "City", "State", "ZipCode");
-
-                    b.ToTable("properties");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.PropertyDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BlobUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("DocumentType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PropertyId");
-
-                    b.ToTable("property_documents");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.TaskItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CompletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DealId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Priority")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TaskStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TaskType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("DealId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("OrganizationId", "DueDate", "TaskStatus");
-
-                    b.ToTable("task_items");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Contact", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("Contacts")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
             modelBuilder.Entity("REIstack.Domain.Models.FieldMappingTemplate", b =>
                 {
                     b.HasOne("REIstack.Domain.Models.Organization", "Organization")
@@ -1876,7 +1284,7 @@ namespace REIstacks.Infrastructure.Migrations
             modelBuilder.Entity("REIstack.Domain.Models.MarketingCampaign", b =>
                 {
                     b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("MarketingCampaigns")
+                        .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1995,95 +1403,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.CampaignContact", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.MarketingCampaign", "Campaign")
-                        .WithMany("CampaignContacts")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
-
-                    b.Navigation("Contact");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Communication", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Contact", "Contact")
-                        .WithMany("Communications")
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("REIstacks.Domain.Models.Deal", "Deal")
-                        .WithMany()
-                        .HasForeignKey("DealId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("Communications")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("Deal");
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Deal", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Contact", "BuyerContact")
-                        .WithMany()
-                        .HasForeignKey("BuyerContactId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("Deals")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstacks.Domain.Models.Property", "Property")
-                        .WithMany("Deals")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.Contact", "SellerContact")
-                        .WithMany("Deals")
-                        .HasForeignKey("SellerContactId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("BuyerContact");
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("Property");
-
-                    b.Navigation("SellerContact");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.DealDocument", b =>
-                {
-                    b.HasOne("REIstacks.Domain.Models.Deal", "Deal")
-                        .WithMany("Documents")
-                        .HasForeignKey("DealId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Deal");
-                });
-
             modelBuilder.Entity("REIstacks.Domain.Models.DomainVerification", b =>
                 {
                     b.HasOne("REIstack.Domain.Models.Organization", "Organization")
@@ -2178,78 +1497,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Template");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.Property", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("Properties")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.Contact", "OwnerContact")
-                        .WithMany("Properties")
-                        .HasForeignKey("OwnerContactId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("OwnerContact");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.PropertyDocument", b =>
-                {
-                    b.HasOne("REIstacks.Domain.Models.Property", "Property")
-                        .WithMany("Documents")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Property");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.TaskItem", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Contact", "Contact")
-                        .WithMany("Tasks")
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REIstacks.Domain.Models.Deal", "Deal")
-                        .WithMany("TaskItems")
-                        .HasForeignKey("DealId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("TaskItems")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstacks.Domain.Models.Property", "Property")
-                        .WithMany("TaskItems")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("Deal");
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("Property");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Contact", b =>
-                {
-                    b.Navigation("Communications");
-
-                    b.Navigation("Deals");
-
-                    b.Navigation("Properties");
-
-                    b.Navigation("Tasks");
-                });
-
             modelBuilder.Entity("REIstack.Domain.Models.ImportJob", b =>
                 {
                     b.Navigation("ImportErrors");
@@ -2262,20 +1509,12 @@ namespace REIstacks.Infrastructure.Migrations
 
             modelBuilder.Entity("REIstack.Domain.Models.MarketingCampaign", b =>
                 {
-                    b.Navigation("CampaignContacts");
-
                     b.Navigation("Leads");
                 });
 
             modelBuilder.Entity("REIstack.Domain.Models.Organization", b =>
                 {
                     b.Navigation("ActivityLogs");
-
-                    b.Navigation("Communications");
-
-                    b.Navigation("Contacts");
-
-                    b.Navigation("Deals");
 
                     b.Navigation("DomainVerifications");
 
@@ -2287,17 +1526,11 @@ namespace REIstacks.Infrastructure.Migrations
 
                     b.Navigation("Leads");
 
-                    b.Navigation("MarketingCampaigns");
-
                     b.Navigation("OrganizationRoles");
-
-                    b.Navigation("Properties");
 
                     b.Navigation("RolePermissions");
 
                     b.Navigation("StripeSubscriptions");
-
-                    b.Navigation("TaskItems");
 
                     b.Navigation("UserProfiles");
                 });
@@ -2327,27 +1560,11 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.Deal", b =>
-                {
-                    b.Navigation("Documents");
-
-                    b.Navigation("TaskItems");
-                });
-
             modelBuilder.Entity("REIstacks.Domain.Models.LandingPages", b =>
                 {
                     b.Navigation("Components");
 
                     b.Navigation("Leads");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Property", b =>
-                {
-                    b.Navigation("Deals");
-
-                    b.Navigation("Documents");
-
-                    b.Navigation("TaskItems");
                 });
 #pragma warning restore 612, 618
         }

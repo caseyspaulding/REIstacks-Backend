@@ -34,10 +34,168 @@ public class AppDbContext : DbContext
     public DbSet<LandingPageLead> LandingPageLeads { get; set; }
     public DbSet<LandingPages> LandingPages { get; set; }
     public DbSet<LeadListFile> LeadListFiles { get; set; }
+    public DbSet<FieldMappingTemplate> FieldMappingTemplates { get; set; }
+    public DbSet<ImportJob> ImportJobs { get; set; } // Note: Changed from ImportJob to ImportJobs for consistency
+    public DbSet<ImportError> ImportErrors { get; set; }
+    // CRM Entities
+    public DbSet<Contact> Contacts { get; set; }
+    public DbSet<Property> Properties { get; set; }
+    public DbSet<Deal> Deals { get; set; }
+    public DbSet<Communication> Communications { get; set; }
+    public DbSet<TaskItem> TaskItems { get; set; }
 
+    public DbSet<CampaignContact> CampaignContacts { get; set; }
+    public DbSet<PropertyDocument> PropertyDocuments { get; set; }
+    public DbSet<DealDocument> DealDocuments { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+
+        // Configure relationship between Organization and Contacts
+        modelBuilder.Entity<Contact>()
+            .HasOne(c => c.Organization)
+            .WithMany(o => o.Contacts)
+            .HasForeignKey(c => c.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between Organization and Properties
+        modelBuilder.Entity<Property>()
+            .HasOne(p => p.Organization)
+            .WithMany(o => o.Properties)
+            .HasForeignKey(p => p.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between Property and OwnerContact
+        modelBuilder.Entity<Property>()
+            .HasOne(p => p.OwnerContact)
+            .WithMany(c => c.Properties)
+            .HasForeignKey(p => p.OwnerContactId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Organization and Deals
+        modelBuilder.Entity<Deal>()
+            .HasOne(d => d.Organization)
+            .WithMany(o => o.Deals)
+            .HasForeignKey(d => d.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between Deal and Property
+        modelBuilder.Entity<Deal>()
+            .HasOne(d => d.Property)
+            .WithMany(p => p.Deals)
+            .HasForeignKey(d => d.PropertyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Deal and SellerContact
+        modelBuilder.Entity<Deal>()
+            .HasOne(d => d.SellerContact)
+            .WithMany(c => c.Deals)
+            .HasForeignKey(d => d.SellerContactId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Deal and BuyerContact
+        modelBuilder.Entity<Deal>()
+            .HasOne(d => d.BuyerContact)
+            .WithMany() // No navigation property back to Deal in Contact
+            .HasForeignKey(d => d.BuyerContactId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Organization and Communications
+        modelBuilder.Entity<Communication>()
+            .HasOne(c => c.Organization)
+            .WithMany(o => o.Communications)
+            .HasForeignKey(c => c.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between Communication and Contact
+        modelBuilder.Entity<Communication>()
+            .HasOne(c => c.Contact)
+            .WithMany(c => c.Communications)
+            .HasForeignKey(c => c.ContactId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Communication and Deal
+        modelBuilder.Entity<Communication>()
+            .HasOne(c => c.Deal)
+            .WithMany() // No navigation property back to Communication in Deal
+            .HasForeignKey(c => c.DealId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Organization and Tasks
+        modelBuilder.Entity<Domain.Models.TaskItem>()
+            .HasOne(t => t.Organization)
+            .WithMany(o => o.TaskItems)
+            .HasForeignKey(t => t.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between Task and Contact
+        modelBuilder.Entity<Domain.Models.TaskItem>()
+            .HasOne(t => t.Contact)
+            .WithMany(c => c.Tasks)
+            .HasForeignKey(t => t.ContactId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Task and Property
+        modelBuilder.Entity<TaskItem>()
+            .HasOne(t => t.Property)
+            .WithMany(p => p.TaskItems)
+            .HasForeignKey(t => t.PropertyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Task and Deal
+        modelBuilder.Entity<TaskItem>()
+            .HasOne(t => t.Deal)
+            .WithMany(d => d.TaskItems)
+            .HasForeignKey(t => t.DealId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between Organization and MarketingCampaigns
+        modelBuilder.Entity<MarketingCampaign>()
+            .HasOne(mc => mc.Organization)
+            .WithMany(o => o.MarketingCampaigns)
+            .HasForeignKey(mc => mc.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure many-to-many relationship between Campaigns and Contacts
+        modelBuilder.Entity<CampaignContact>()
+            .HasOne(cc => cc.Campaign)
+            .WithMany(c => c.CampaignContacts)
+            .HasForeignKey(cc => cc.CampaignId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CampaignContact>()
+            .HasOne(cc => cc.Contact)
+            .WithMany() // No navigation property back to CampaignContact in Contact
+            .HasForeignKey(cc => cc.ContactId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure relationship between PropertyDocument and Property
+        modelBuilder.Entity<PropertyDocument>()
+            .HasOne(pd => pd.Property)
+            .WithMany(p => p.Documents)
+            .HasForeignKey(pd => pd.PropertyId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between DealDocument and Deal
+        modelBuilder.Entity<DealDocument>()
+            .HasOne(dd => dd.Deal)
+            .WithMany(d => d.Documents)
+            .HasForeignKey(dd => dd.DealId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Add indexes for better query performance
+        modelBuilder.Entity<Contact>()
+            .HasIndex(c => new { c.OrganizationId, c.LastName, c.FirstName });
+
+        modelBuilder.Entity<Property>()
+            .HasIndex(p => new { p.OrganizationId, p.City, p.State, p.ZipCode });
+
+        modelBuilder.Entity<Deal>()
+            .HasIndex(d => new { d.OrganizationId, d.DealStatus });
+
+        modelBuilder.Entity<TaskItem>()
+            .HasIndex(t => new { t.OrganizationId, t.DueDate, t.TaskStatus });
 
         // Configure LandingPage
         modelBuilder.Entity<LandingPages>()
@@ -53,7 +211,25 @@ public class AppDbContext : DbContext
     .HasForeignKey(lpc => lpc.LandingPageId)
     .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<FieldMappingTemplate>()
+            .HasOne(fmt => fmt.Organization)
+            .WithMany(o => o.FieldMappingTemplates) // You'll need to add this to your Organization class
+            .HasForeignKey(fmt => fmt.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        // Configure relationship between LeadListFile and ImportJobs
+        modelBuilder.Entity<ImportJob>()
+            .HasOne(ij => ij.File)
+            .WithMany(llf => llf.ImportJobs) // You'll need to add this to your LeadListFile class
+            .HasForeignKey(ij => ij.FileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure relationship between ImportJob and ImportErrors
+        modelBuilder.Entity<REIstack.Domain.Models.ImportError>()
+            .HasOne(ie => ie.Job)
+            .WithMany(ij => ij.ImportErrors)
+            .HasForeignKey(ie => ie.JobId)
+            .OnDelete(DeleteBehavior.Cascade);
         // Configure unique slug per organization
         modelBuilder.Entity<LandingPages>()
             .HasIndex(p => new { p.OrganizationId, p.Slug })

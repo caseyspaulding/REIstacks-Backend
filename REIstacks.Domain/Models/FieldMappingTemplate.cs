@@ -4,39 +4,31 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace REIstack.Domain.Models;
 
-[Table("lead_list_files")]
-public class LeadListFile
+[Table("field_mapping_templates")]
+public class FieldMappingTemplate
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [Required]
+    [MaxLength(450)]
     public string OrganizationId { get; set; }
 
     [Required]
+    [MaxLength(100)]
+    public string Name { get; set; }
+
     [MaxLength(255)]
-    public string FileName { get; set; }
+    public string Description { get; set; }
 
     [Required]
-    public string BlobUrl { get; set; }
-
     public string MappingConfig { get; set; }
 
-    public string Tags { get; set; }
-
-    public int? RecordsCount { get; set; }
-
     [Required]
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-
-    public bool IsProcessed { get; set; } = false;
-
-    public DateTime? ProcessedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation property
     [ForeignKey("OrganizationId")]
     public virtual Organization Organization { get; set; }
-
-    public virtual ICollection<ImportJob> ImportJobs { get; set; }
 }
