@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using REIstack.Domain.Models;
+using REIstacks.Domain.Entities.Auth;
+using REIstacks.Domain.Entities.Organizations;
+using REIstacks.Domain.Entities.User;
 using System.Security.Claims;
 
 namespace REIstacks.Application.Interfaces;

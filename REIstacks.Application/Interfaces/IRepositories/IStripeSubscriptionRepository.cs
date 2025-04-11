@@ -1,4 +1,4 @@
-﻿using REIstack.Domain.Models;
+﻿using REIstacks.Domain.Entities.Billing;
 using REIstacks.Domain.Repositories;
 
 namespace REIstacks.Application.Repositories.Interfaces;

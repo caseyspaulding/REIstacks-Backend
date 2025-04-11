@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using REIstack.Domain.Models;
 using REIstacks.Application.Contracts.Requests;
 using REIstacks.Application.Interfaces;
+using REIstacks.Domain.Entities.Billing;
 using REIstacks.Infrastructure.Data;
 using System.Security.Claims;
 

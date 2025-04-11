@@ -1,6 +1,7 @@
 ﻿using REIstacks.Application.Interfaces;
 using REIstacks.Application.Repositories.Interfaces;
-using REIstacks.Domain.Models;
+using REIstacks.Domain.Entities.User;
+
 
 namespace REIstacks.Application.Services.Users;
 

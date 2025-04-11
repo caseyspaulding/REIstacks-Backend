@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using REIstack.Domain.Models;
 using REIstacks.Application.Interfaces;
 using REIstacks.Application.Repositories.Interfaces;
+using REIstacks.Domain.Entities.Organizations;
 using REIstacks.Infrastructure.Data;
 using System.Security.Claims;
 

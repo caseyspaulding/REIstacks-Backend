@@ -1,4 +1,6 @@
-﻿using REIstack.Domain.Models;
+﻿
+
+using REIstacks.Domain.Entities.Organizations;
 
 namespace REIstacks.Application.Contracts.Responses;
 

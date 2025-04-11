@@ -17,12 +17,276 @@ namespace REIstacks.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("REIstack.Domain.Models.Contact", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Auth.ExternalAuth", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("Provider", "ExternalId")
+                        .IsUnique()
+                        .HasFilter("[ExternalId] IS NOT NULL");
+
+                    b.ToTable("external_auth");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Auth.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("refresh_tokens");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Billing.StripeSubscription", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("CancelAtPeriodEnd")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CurrentPeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CurrentPeriodStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrganizationId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PlanId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StripeSubscriptionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("TrialEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("TrialStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("StripeSubscriptionId")
+                        .IsUnique();
+
+                    b.ToTable("stripe_subscriptions");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Blog.BlogPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsMainSiteBlog")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasAnnotation("Relational:JsonPropertyName", "organizationId");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("blog_posts");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Communication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CommunicationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CommunicationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DealId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Direction")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("DealId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("communications");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Contact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -138,116 +402,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("contacts");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.FieldMappingTemplate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("MappingConfig")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("field_mapping_templates");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.ImportError", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Field")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("JobId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RowNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JobId");
-
-                    b.ToTable("import_errors");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.ImportJob", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("FileId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RecordsImported")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RecordsProcessed")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RecordsRejected")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FileId");
-
-                    b.ToTable("import_jobs");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Lead", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Lead", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -457,728 +612,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("leads");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.LeadListFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BlobUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsProcessed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MappingConfig")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("RecordsCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("lead_list_files");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.MarketingCampaign", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("ActualCost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Budget")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CampaignType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("Conversions")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("CostPerLead")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DealsGenerated")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LeadsGenerated")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("ROI")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TargetCriteria")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("marketing_campaigns");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Organization", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CustomDomain")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("HasVerifiedDomain")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("PrimaryDomain")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("StripeCustomerId")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("StripeSubscriptionId")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Subdomain")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("SubscriptionStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ThemeColor")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomDomain")
-                        .IsUnique()
-                        .HasFilter("[CustomDomain] IS NOT NULL");
-
-                    b.HasIndex("OwnerId");
-
-                    b.HasIndex("Subdomain")
-                        .IsUnique();
-
-                    b.ToTable("organizations");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.OrganizationRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsCustom")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("organization_roles");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.PermissionEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("permissions");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("IssuedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId");
-
-                    b.ToTable("refresh_tokens");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.RolePermission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Permission")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PermissionEntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("PermissionEntityId");
-
-                    b.ToTable("role_permissions");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.StripeSubscription", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("CancelAtPeriodEnd")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CurrentPeriodEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CurrentPeriodStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PlanId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeSubscriptionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("TrialEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("TrialStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("StripeSubscriptionId")
-                        .IsUnique();
-
-                    b.ToTable("stripe_subscriptions");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Template", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool>("IsSystem")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("ThumbnailUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Templates");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.TemplateComponent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ComponentType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("DefaultSettings")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TemplateId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TemplateId");
-
-                    b.ToTable("TemplateComponents");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.UserProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("EmailVerifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ExternalId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ExternalProvider")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsOnboarded")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSetupComplete")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastLogin")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("OrganizationRoleId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("SmsConsent")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("SmsConsentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("OrganizationRoleId");
-
-                    b.ToTable("profiles");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.ActivityLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Action")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ActionType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("nvarchar(45)");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("activity_logs");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.BlogPost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsMainSiteBlog")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasAnnotation("Relational:JsonPropertyName", "organizationId");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
-                    b.ToTable("blog_posts");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.CampaignContact", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LastContactedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.HasIndex("ContactId");
-
-                    b.ToTable("campaign_contacts");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Communication", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CommunicationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CommunicationType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DealId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Direction")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Subject")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("DealId");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("communications");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Deal", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Deals.Deal", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1279,7 +713,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("deals");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.DealDocument", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Deals.DealDocument", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1317,7 +751,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("deal_documents");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.DomainVerification", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.CampaignContact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1325,145 +759,32 @@ namespace REIstacks.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("AddedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Domain")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VerificationToken")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId", "Domain")
-                        .IsUnique();
-
-                    b.ToTable("domain_verifications");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.ExternalAuth", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccessToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ExternalId")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId");
-
-                    b.HasIndex("Provider", "ExternalId")
-                        .IsUnique()
-                        .HasFilter("[ExternalId] IS NOT NULL");
-
-                    b.ToTable("external_auth");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Invitation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("CampaignId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("ContactId")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime?>("AcceptedAt")
+                    b.Property<DateTime?>("LastContactedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("AcceptedByProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("InvitedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("InvitedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AcceptedByProfileId");
+                    b.HasIndex("CampaignId");
 
-                    b.HasIndex("InvitedBy");
+                    b.HasIndex("ContactId");
 
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("invitations");
+                    b.ToTable("campaign_contacts");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPageComponent", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPageComponent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1497,7 +818,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("LandingPageComponents");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPageLead", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPageLead", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1523,7 +844,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("LandingPageLeads");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPages", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPages", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1582,7 +903,417 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("LandingPages");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.Property", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.MarketingCampaign", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("ActualCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Budget")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CampaignType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Conversions")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("CostPerLead")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DealsGenerated")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LeadsGenerated")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("ROI")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TargetCriteria")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("marketing_campaigns");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.Template", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Templates");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.TemplateComponent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ComponentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DefaultSettings")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TemplateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TemplateId");
+
+                    b.ToTable("TemplateComponents");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.DomainVerification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VerificationToken")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId", "Domain")
+                        .IsUnique();
+
+                    b.ToTable("domain_verifications");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.Invitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("AcceptedByProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("InvitedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("InvitedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AcceptedByProfileId");
+
+                    b.HasIndex("InvitedBy");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("invitations");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.Organization", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomDomain")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("HasVerifiedDomain")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PrimaryDomain")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripeCustomerId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripeSubscriptionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Subdomain")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("SubscriptionStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThemeColor")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomDomain")
+                        .IsUnique()
+                        .HasFilter("[CustomDomain] IS NOT NULL");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("Subdomain")
+                        .IsUnique();
+
+                    b.ToTable("organizations");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.OrganizationRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCustom")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("organization_roles");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.PermissionEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("permissions");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.RolePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Permission")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PermissionEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("PermissionEntityId");
+
+                    b.ToTable("role_permissions");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Properties.Property", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1692,7 +1423,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("properties");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.PropertyDocument", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Properties.PropertyDocument", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1730,7 +1461,7 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("property_documents");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.TaskItem", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Tasks.TaskItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1801,113 +1532,310 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("task_items");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.Contact", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.FieldMappingTemplate", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("Contacts")
-                        .HasForeignKey("OrganizationId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("MappingConfig")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("field_mapping_templates");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.ImportError", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Field")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("RowNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("import_errors");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.ImportJob", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("RecordsImported")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RecordsProcessed")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RecordsRejected")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("TotalImported")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("import_jobs");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.LeadListFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BlobUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MappingConfig")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("RecordsCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("lead_list_files");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.User.ActivityLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActionType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<string>("OrganizationId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("activity_logs");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.User.UserProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EmailVerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalProvider")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsOnboarded")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSetupComplete")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrganizationId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("OrganizationRoleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SmsConsent")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("SmsConsentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationRoleId");
+
+                    b.ToTable("profiles");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Auth.ExternalAuth", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "Profile")
+                        .WithMany("ExternalAuths")
+                        .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Organization");
+                    b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.FieldMappingTemplate", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Auth.RefreshToken", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("FieldMappingTemplates")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.ImportError", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.ImportJob", "Job")
-                        .WithMany("ImportErrors")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Job");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.ImportJob", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.LeadListFile", "File")
-                        .WithMany("ImportJobs")
-                        .HasForeignKey("FileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("File");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Lead", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.MarketingCampaign", "Campaign")
-                        .WithMany("Leads")
-                        .HasForeignKey("CampaignId");
-
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("Leads")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.LeadListFile", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.MarketingCampaign", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("MarketingCampaigns")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.Organization", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.UserProfile", "Owner")
-                        .WithMany("OwnedOrganizations")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.OrganizationRole", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("OrganizationRoles")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.RefreshToken", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.UserProfile", "Profile")
+                    b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "Profile")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1916,24 +1844,9 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.RolePermission", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Billing.StripeSubscription", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.PermissionEntity", null)
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionEntityId");
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.StripeSubscription", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("StripeSubscriptions")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -1941,52 +1854,9 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.TemplateComponent", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Blog.BlogPost", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Template", "Template")
-                        .WithMany("Components")
-                        .HasForeignKey("TemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Template");
-                });
-
-            modelBuilder.Entity("REIstack.Domain.Models.UserProfile", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("UserProfiles")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("REIstack.Domain.Models.OrganizationRole", "OrganizationRole")
-                        .WithMany()
-                        .HasForeignKey("OrganizationRoleId");
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("OrganizationRole");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.ActivityLog", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("ActivityLogs")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("REIstack.Domain.Models.UserProfile", "User")
-                        .WithMany("ActivityLogs")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Organization");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.BlogPost", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1995,39 +1865,20 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.CampaignContact", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Communication", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.MarketingCampaign", "Campaign")
-                        .WithMany("CampaignContacts")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
-
-                    b.Navigation("Contact");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Communication", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Contact", "Contact")
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "Contact")
                         .WithMany("Communications")
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("REIstacks.Domain.Models.Deal", "Deal")
+                    b.HasOne("REIstacks.Domain.Entities.Deals.Deal", "Deal")
                         .WithMany()
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("Communications")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2040,26 +1891,54 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.Deal", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Contact", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Contact", "BuyerContact")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("Contacts")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Lead", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Marketing.MarketingCampaign", "Campaign")
+                        .WithMany("Leads")
+                        .HasForeignKey("CampaignId");
+
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("Leads")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Deals.Deal", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "BuyerContact")
                         .WithMany()
                         .HasForeignKey("BuyerContactId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("Deals")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("REIstacks.Domain.Models.Property", "Property")
+                    b.HasOne("REIstacks.Domain.Entities.Properties.Property", "Property")
                         .WithMany("Deals")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("REIstack.Domain.Models.Contact", "SellerContact")
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "SellerContact")
                         .WithMany("Deals")
                         .HasForeignKey("SellerContactId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -2073,9 +1952,9 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("SellerContact");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.DealDocument", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Deals.DealDocument", b =>
                 {
-                    b.HasOne("REIstacks.Domain.Models.Deal", "Deal")
+                    b.HasOne("REIstacks.Domain.Entities.Deals.Deal", "Deal")
                         .WithMany("Documents")
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2084,9 +1963,97 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Deal");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.DomainVerification", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.CampaignContact", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Marketing.MarketingCampaign", "Campaign")
+                        .WithMany("CampaignContacts")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("Contact");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPageComponent", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Marketing.LandingPages", "LandingPage")
+                        .WithMany("Components")
+                        .HasForeignKey("LandingPageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LandingPage");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPageLead", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Marketing.LandingPages", "LandingPage")
+                        .WithMany("Leads")
+                        .HasForeignKey("LandingPageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LandingPage");
+
+                    b.Navigation("Lead");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPages", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("LandingPages")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("REIstacks.Domain.Entities.Marketing.Template", "Template")
+                        .WithMany("LandingPages")
+                        .HasForeignKey("TemplateId");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("Template");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.MarketingCampaign", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("MarketingCampaigns")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.TemplateComponent", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Marketing.Template", "Template")
+                        .WithMany("Components")
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Template");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.DomainVerification", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("DomainVerifications")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2095,30 +2062,19 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.ExternalAuth", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.Invitation", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.UserProfile", "Profile")
-                        .WithMany("ExternalAuths")
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Profile");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Invitation", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.UserProfile", "AcceptedByProfile")
+                    b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "AcceptedByProfile")
                         .WithMany()
                         .HasForeignKey("AcceptedByProfileId");
 
-                    b.HasOne("REIstack.Domain.Models.UserProfile", "InvitedByProfile")
+                    b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "InvitedByProfile")
                         .WithMany("InvitationsSent")
                         .HasForeignKey("InvitedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("Invitations")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2131,62 +2087,51 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPageComponent", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.Organization", b =>
                 {
-                    b.HasOne("REIstacks.Domain.Models.LandingPages", "LandingPage")
-                        .WithMany("Components")
-                        .HasForeignKey("LandingPageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "Owner")
+                        .WithMany("OwnedOrganizations")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("LandingPage");
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPageLead", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.OrganizationRole", b =>
                 {
-                    b.HasOne("REIstacks.Domain.Models.LandingPages", "LandingPage")
-                        .WithMany("Leads")
-                        .HasForeignKey("LandingPageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.Lead", "Lead")
-                        .WithMany()
-                        .HasForeignKey("LeadId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LandingPage");
-
-                    b.Navigation("Lead");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPages", b =>
-                {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
-                        .WithMany("LandingPages")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("OrganizationRoles")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("REIstack.Domain.Models.Template", "Template")
-                        .WithMany("LandingPages")
-                        .HasForeignKey("TemplateId");
 
                     b.Navigation("Organization");
-
-                    b.Navigation("Template");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.Property", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.RolePermission", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.PermissionEntity", null)
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionEntityId");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Properties.Property", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("Properties")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("REIstack.Domain.Models.Contact", "OwnerContact")
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "OwnerContact")
                         .WithMany("Properties")
                         .HasForeignKey("OwnerContactId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -2196,9 +2141,9 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("OwnerContact");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.PropertyDocument", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Properties.PropertyDocument", b =>
                 {
-                    b.HasOne("REIstacks.Domain.Models.Property", "Property")
+                    b.HasOne("REIstacks.Domain.Entities.Properties.Property", "Property")
                         .WithMany("Documents")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2207,25 +2152,25 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Property");
                 });
 
-            modelBuilder.Entity("REIstacks.Domain.Models.TaskItem", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Tasks.TaskItem", b =>
                 {
-                    b.HasOne("REIstack.Domain.Models.Contact", "Contact")
+                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "Contact")
                         .WithMany("Tasks")
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("REIstacks.Domain.Models.Deal", "Deal")
+                    b.HasOne("REIstacks.Domain.Entities.Deals.Deal", "Deal")
                         .WithMany("TaskItems")
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("REIstack.Domain.Models.Organization", "Organization")
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("TaskItems")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("REIstacks.Domain.Models.Property", "Property")
+                    b.HasOne("REIstacks.Domain.Entities.Properties.Property", "Property")
                         .WithMany("TaskItems")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -2239,7 +2184,99 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Property");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.Contact", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.FieldMappingTemplate", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("FieldMappingTemplates")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.ImportError", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.UploadLeads.ImportJob", "Job")
+                        .WithMany("ImportErrors")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("ImportErrors")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.ImportJob", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.UploadLeads.LeadListFile", "File")
+                        .WithMany("ImportJobs")
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("ImportJobs")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("File");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.LeadListFile", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.User.ActivityLog", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("ActivityLogs")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "User")
+                        .WithMany("ActivityLogs")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.User.UserProfile", b =>
+                {
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("UserProfiles")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("REIstacks.Domain.Entities.Organizations.OrganizationRole", "OrganizationRole")
+                        .WithMany()
+                        .HasForeignKey("OrganizationRoleId");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("OrganizationRole");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Contact", b =>
                 {
                     b.Navigation("Communications");
 
@@ -2250,24 +2287,35 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.ImportJob", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Deals.Deal", b =>
                 {
-                    b.Navigation("ImportErrors");
+                    b.Navigation("Documents");
+
+                    b.Navigation("TaskItems");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.LeadListFile", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.LandingPages", b =>
                 {
-                    b.Navigation("ImportJobs");
+                    b.Navigation("Components");
+
+                    b.Navigation("Leads");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.MarketingCampaign", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.MarketingCampaign", b =>
                 {
                     b.Navigation("CampaignContacts");
 
                     b.Navigation("Leads");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.Organization", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Marketing.Template", b =>
+                {
+                    b.Navigation("Components");
+
+                    b.Navigation("LandingPages");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.Organization", b =>
                 {
                     b.Navigation("ActivityLogs");
 
@@ -2280,6 +2328,10 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("DomainVerifications");
 
                     b.Navigation("FieldMappingTemplates");
+
+                    b.Navigation("ImportErrors");
+
+                    b.Navigation("ImportJobs");
 
                     b.Navigation("Invitations");
 
@@ -2302,19 +2354,31 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("UserProfiles");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.PermissionEntity", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Organizations.PermissionEntity", b =>
                 {
                     b.Navigation("RolePermissions");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.Template", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.Properties.Property", b =>
                 {
-                    b.Navigation("Components");
+                    b.Navigation("Deals");
 
-                    b.Navigation("LandingPages");
+                    b.Navigation("Documents");
+
+                    b.Navigation("TaskItems");
                 });
 
-            modelBuilder.Entity("REIstack.Domain.Models.UserProfile", b =>
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.ImportJob", b =>
+                {
+                    b.Navigation("ImportErrors");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.UploadLeads.LeadListFile", b =>
+                {
+                    b.Navigation("ImportJobs");
+                });
+
+            modelBuilder.Entity("REIstacks.Domain.Entities.User.UserProfile", b =>
                 {
                     b.Navigation("ActivityLogs");
 
@@ -2325,29 +2389,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("OwnedOrganizations");
 
                     b.Navigation("RefreshTokens");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Deal", b =>
-                {
-                    b.Navigation("Documents");
-
-                    b.Navigation("TaskItems");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.LandingPages", b =>
-                {
-                    b.Navigation("Components");
-
-                    b.Navigation("Leads");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Models.Property", b =>
-                {
-                    b.Navigation("Deals");
-
-                    b.Navigation("Documents");
-
-                    b.Navigation("TaskItems");
                 });
 #pragma warning restore 612, 618
         }

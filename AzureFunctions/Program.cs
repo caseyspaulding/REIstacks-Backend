@@ -1,13 +1,21 @@
-using Microsoft.Azure.Functions.Worker.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using REIstacks.Application.Interfaces.IServices;
+using REIstacks.Infrastructure.Services.Communications;
 
-var builder = FunctionsApplication.CreateBuilder(args);
+var host = new HostBuilder()
+    .ConfigureAppConfiguration(builder =>
+    {
+        builder.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true);
+        // etc...
+    })
+    .ConfigureFunctionsWebApplication()
+    .ConfigureServices(services =>
+    {
+        // Register your SMS service as ISmsService
+        services.AddSingleton<ISmsService, AzureSmsService>();
+    })
+    .Build();
 
-builder.ConfigureFunctionsWebApplication();
-
-// Application Insights isn't enabled by default. See https://aka.ms/AAt8mw4.
-// builder.Services
-//     .AddApplicationInsightsTelemetryWorkerService()
-//     .ConfigureFunctionsApplicationInsights();
-
-builder.Build().Run();
+host.Run();

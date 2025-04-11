@@ -3,12 +3,12 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using REIstack.Domain.Models;
 using REIstacks.Application.Contracts.Responses;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Application.Services.Interfaces;
-using REIstacks.Domain.Models;
-
+using REIstacks.Domain.Entities.Auth;
+using REIstacks.Domain.Entities.Organizations;
+using REIstacks.Domain.Entities.User;
 using System.Net.Http.Json;
 using System.Security.Claims;
 

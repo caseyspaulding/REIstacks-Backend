@@ -1,0 +1,138 @@
+﻿using Microsoft.AspNetCore.Http;
+using REIstacks.Application.Contracts.Requests; // Contains FinalizeImportRequest DTO.
+using REIstacks.Application.Contracts.Responses;
+using REIstacks.Application.Interfaces;
+using REIstacks.Application.Interfaces.IServices;
+using REIstacks.Domain.Entities.UploadLeads;
+using REIstacks.Infrastructure.Data;
+
+namespace REIstacks.Infrastructure.Services.ListImport
+{
+    public class LeadsImportService : ILeadsImportService
+    {
+        private readonly ICsvImportService _csvImportService;
+        private readonly AppDbContext _db;
+        private readonly IStorageService _storageService;
+
+        public LeadsImportService(ICsvImportService csvImportService, AppDbContext db, IStorageService storageService)
+        {
+            _csvImportService = csvImportService;
+            _db = db;
+            _storageService = storageService;
+        }
+
+        /// <summary>
+        /// Uploads the CSV file to blob storage and records the file upload in the database.
+        /// </summary>
+        public async Task<FileUploadResponse> UploadFileAsync(string organizationId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("No CSV file provided.", nameof(file));
+
+            // Upload the file to blob storage using the CSV import service.
+            string blobUrl;
+            using (var stream = file.OpenReadStream())
+            {
+                blobUrl = await _csvImportService.UploadFileAsync(stream, file.FileName, organizationId);
+            }
+
+            // Record the file upload in the database.
+            var leadListFile = new LeadListFile
+            {
+                OrganizationId = organizationId,
+                FileName = file.FileName,
+                BlobUrl = blobUrl,
+                UploadedAt = DateTime.UtcNow
+            };
+
+            await _db.LeadListFiles.AddAsync(leadListFile);
+            await _db.SaveChangesAsync();
+
+            return new FileUploadResponse
+            {
+                Message = "File uploaded successfully",
+                LeadListFileId = leadListFile.Id,
+                BlobUrl = blobUrl
+            };
+        }
+
+        /// <summary>
+        /// Downloads the CSV file from blob storage and returns a preview of its content.
+        /// </summary>
+        public async Task<object> GetPreviewAsync(int leadListFileId, int sampleRows = 5)
+        {
+            // Retrieve the file record from the database.
+            var leadListFile = await _db.LeadListFiles.FindAsync(leadListFileId);
+            if (leadListFile == null)
+                throw new Exception("LeadListFile not found.");
+
+            // Download the file from blob storage.
+            using var fileStream = await _storageService.DownloadFileAsync(leadListFile.BlobUrl);
+
+            // Get a preview of the CSV data.
+            var preview = await _csvImportService.GetPreviewAsync(fileStream, sampleRows);
+            return preview;
+        }
+
+        /// <summary>
+        /// Finalizes the CSV import by processing the file, mapping the fields, and updating the job record.
+        /// </summary>
+        public async Task<object> FinalizeImportAsync(FinalizeImportRequest request)
+        {
+            // Retrieve the file record from the database.
+            var leadListFile = await _db.LeadListFiles.FindAsync(request.LeadListFileId);
+            if (leadListFile == null)
+                throw new Exception("LeadListFile not found.");
+
+            // Create an import job record.
+            var importJob = new ImportJob
+            {
+                FileId = request.LeadListFileId,
+                OrganizationId = leadListFile.OrganizationId,
+                Status = "InProgress",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _db.ImportJobs.AddAsync(importJob);
+            await _db.SaveChangesAsync();
+
+            // Process the CSV file using the provided field mappings.
+            var result = await _csvImportService.ProcessFileFromStorageAsync(
+                leadListFile.BlobUrl,
+                request.FieldMappings,
+                leadListFile.OrganizationId
+            );
+
+            // Update the import job based on the result.
+            importJob.Status = result.Success ? "Completed" : "Failed";
+            importJob.CompletedAt = DateTime.UtcNow;
+            importJob.TotalImported = result.TotalImported;
+
+            // Record each error (if any) in the import error log.
+            if (!result.Success || (result.Errors != null && result.Errors.Count > 0))
+            {
+                foreach (var errorMsg in result.Errors)
+                {
+                    var importError = new ImportError
+                    {
+                        JobId = importJob.Id,
+                        ErrorMessage = errorMsg,
+                        OccurredAt = DateTime.UtcNow
+                    };
+                    await _db.ImportErrors.AddAsync(importError);
+                }
+            }
+
+            _db.ImportJobs.Update(importJob);
+            await _db.SaveChangesAsync();
+
+            // Return a response object for the finalize import operation.
+            return new
+            {
+                success = result.Success,
+                totalImported = result.TotalImported,
+                errors = result.Errors
+            };
+        }
+    }
+}

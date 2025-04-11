@@ -1,4 +1,4 @@
-﻿using REIstacks.Domain.Models;
+﻿using REIstacks.Domain.Entities.Blog;
 
 namespace REIstacks.Application.Repositories.Interfaces;
 public interface IBlogRepository

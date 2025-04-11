@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using REIstack.Domain.Models;
 using REIstacks.Application.Interfaces;
 using REIstacks.Application.Repositories.Interfaces;
+using REIstacks.Domain.Entities.Auth;
+using REIstacks.Domain.Entities.Organizations;
+using REIstacks.Domain.Entities.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;

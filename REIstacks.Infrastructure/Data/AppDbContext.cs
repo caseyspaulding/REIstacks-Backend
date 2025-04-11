@@ -1,6 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using REIstack.Domain.Models;
-using REIstacks.Domain.Models;
+using REIstacks.Domain.Entities.Auth;
+using REIstacks.Domain.Entities.Billing;
+using REIstacks.Domain.Entities.Blog;
+using REIstacks.Domain.Entities.CRM;
+using REIstacks.Domain.Entities.Deals;
+using REIstacks.Domain.Entities.Marketing;
+using REIstacks.Domain.Entities.Organizations;
+using REIstacks.Domain.Entities.Properties;
+using REIstacks.Domain.Entities.Tasks;
+using REIstacks.Domain.Entities.UploadLeads;
+using REIstacks.Domain.Entities.User;
+
+
 
 
 namespace REIstacks.Infrastructure.Data;
@@ -43,7 +54,6 @@ public class AppDbContext : DbContext
     public DbSet<Deal> Deals { get; set; }
     public DbSet<Communication> Communications { get; set; }
     public DbSet<TaskItem> TaskItems { get; set; }
-
     public DbSet<CampaignContact> CampaignContacts { get; set; }
     public DbSet<PropertyDocument> PropertyDocuments { get; set; }
     public DbSet<DealDocument> DealDocuments { get; set; }
@@ -123,14 +133,14 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         // Configure relationship between Organization and Tasks
-        modelBuilder.Entity<Domain.Models.TaskItem>()
+        modelBuilder.Entity<TaskItem>()
             .HasOne(t => t.Organization)
             .WithMany(o => o.TaskItems)
             .HasForeignKey(t => t.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure relationship between Task and Contact
-        modelBuilder.Entity<Domain.Models.TaskItem>()
+        modelBuilder.Entity<TaskItem>()
             .HasOne(t => t.Contact)
             .WithMany(c => c.Tasks)
             .HasForeignKey(t => t.ContactId)
@@ -216,7 +226,12 @@ public class AppDbContext : DbContext
             .WithMany(o => o.FieldMappingTemplates) // You'll need to add this to your Organization class
             .HasForeignKey(fmt => fmt.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
-
+        // First definition (correct)
+        modelBuilder.Entity<ImportError>()
+            .HasOne(ie => ie.Organization)
+            .WithMany(o => o.ImportErrors)
+            .HasForeignKey(ie => ie.OrganizationId)
+            .OnDelete(DeleteBehavior.NoAction);
         // Configure relationship between LeadListFile and ImportJobs
         modelBuilder.Entity<ImportJob>()
             .HasOne(ij => ij.File)
@@ -224,12 +239,11 @@ public class AppDbContext : DbContext
             .HasForeignKey(ij => ij.FileId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Configure relationship between ImportJob and ImportErrors
-        modelBuilder.Entity<REIstack.Domain.Models.ImportError>()
-            .HasOne(ie => ie.Job)
-            .WithMany(ij => ij.ImportErrors)
-            .HasForeignKey(ie => ie.JobId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ImportJob>()
+    .HasOne(ij => ij.Organization)
+    .WithMany(o => o.ImportJobs) // Add this property to Organization
+    .HasForeignKey(ij => ij.OrganizationId)
+    .OnDelete(DeleteBehavior.NoAction);
         // Configure unique slug per organization
         modelBuilder.Entity<LandingPages>()
             .HasIndex(p => new { p.OrganizationId, p.Slug })

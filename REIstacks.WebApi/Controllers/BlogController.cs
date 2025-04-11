@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using REIstacks.Application.Contracts.Requests;
 using REIstacks.Application.Contracts.Responses;
 using REIstacks.Application.Repositories.Interfaces;
-using REIstacks.Domain.Models;
+using REIstacks.Domain.Entities.Blog;
 
 namespace reistacks_api.Controllers;
 

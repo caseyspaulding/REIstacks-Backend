@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using REIstacks.Application.Interfaces;
 using REIstacks.Application.Repositories.Interfaces;
-using REIstacks.Domain.Models;
+using REIstacks.Domain.Entities.Organizations;
 
 namespace REIstacks.Infrastructure.Services.Organizations
 {

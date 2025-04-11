@@ -1,4 +1,4 @@
-﻿using REIstacks.Domain.Models;
+﻿using REIstacks.Domain.Entities.Auth;
 using REIstacks.Domain.Repositories;
 
 namespace REIstacks.Application.Repositories.Interfaces;

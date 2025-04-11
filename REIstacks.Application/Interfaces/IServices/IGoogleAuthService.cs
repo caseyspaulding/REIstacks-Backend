@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using REIstack.Domain.Models;
+
 using REIstacks.Application.Contracts.Responses;
+using REIstacks.Domain.Entities.User;
 
 
 namespace REIstacks.Application.Services.Interfaces;

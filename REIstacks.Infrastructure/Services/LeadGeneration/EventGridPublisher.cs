@@ -1,6 +1,6 @@
 using Azure;
 using Azure.Messaging.EventGrid;
-using REIstack.Domain.Models;
+using REIstacks.Domain.Entities.CRM;
 
 
 namespace REIstacks.Infrastructure.Services

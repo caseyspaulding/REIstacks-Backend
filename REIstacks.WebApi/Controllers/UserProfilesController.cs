@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using REIstack.Domain.Models;
+using REIstacks.Domain.Entities.User;
 using REIstacks.Infrastructure.Data;
 
 namespace reistacks_api.Controllers

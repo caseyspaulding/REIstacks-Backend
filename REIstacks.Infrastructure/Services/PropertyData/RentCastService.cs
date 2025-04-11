@@ -1,7 +1,7 @@
 ﻿
 
 using Microsoft.Extensions.Configuration;
-using REIstack.Domain.Models;
+using REIstacks.Domain.Entities.Properties;
 using System.Net.Http.Json;
 
 namespace REIstacks.Infrastructure.Services.PropertyData;

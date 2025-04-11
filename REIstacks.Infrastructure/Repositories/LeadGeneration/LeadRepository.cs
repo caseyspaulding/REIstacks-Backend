@@ -1,7 +1,7 @@
 ﻿// LeadRepository.cs
 using Microsoft.EntityFrameworkCore;
-using REIstack.Domain.Models;
 using REIstacks.Application.Repositories.Interfaces;
+using REIstacks.Domain.Entities.CRM;
 using REIstacks.Infrastructure.Data;
 using REIstacks.Infrastructure.Repositories.BaseRepository;
 

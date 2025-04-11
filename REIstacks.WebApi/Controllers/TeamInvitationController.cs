@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using REIstack.Domain.Models;
 using REIstacks.Application.Contracts.Requests;
 using REIstacks.Application.Interfaces;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Application.Services.Interfaces;
-using REIstacks.Domain.Models;
+using REIstacks.Domain.Entities.Auth;
+using REIstacks.Domain.Entities.Organizations;
+using REIstacks.Domain.Entities.User;
 
 namespace reistacks_api.Controllers;
 

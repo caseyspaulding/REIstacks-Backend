@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using REIstacks.Application.Repositories.Interfaces;
-using REIstacks.Domain.Models;
+using REIstacks.Domain.Entities.User;
 using REIstacks.Infrastructure.Data;
 using REIstacks.Infrastructure.Repositories.BaseRepository;
 

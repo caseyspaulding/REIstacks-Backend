@@ -1,7 +1,7 @@
 ﻿// StripeSubscriptionRepository.cs
 using Microsoft.EntityFrameworkCore;
-using REIstack.Domain.Models;
 using REIstacks.Application.Repositories.Interfaces;
+using REIstacks.Domain.Entities.Billing;
 using REIstacks.Infrastructure.Data;
 using REIstacks.Infrastructure.Repositories.BaseRepository;
 

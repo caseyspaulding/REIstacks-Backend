@@ -1,18 +1,17 @@
-﻿namespace REIstacks.Application.Repositories.Interfaces
+﻿namespace REIstacks.Application.Repositories.Interfaces;
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork : IDisposable
-    {
-        IUserProfileRepository UserProfiles { get; }
-        IOrganizationRepository Organizations { get; }
-        ILeadRepository Leads { get; }
-        IInvitationRepository Invitations { get; }
-        IActivityLogRepository ActivityLogs { get; }
-        IRefreshTokenRepository RefreshTokens { get; }
-        IExternalAuthRepository ExternalAuths { get; }
-        IDomainVerificationRepository DomainVerifications { get; }
-        IStripeSubscriptionRepository StripeSubscriptions { get; }
-        IOrganizationRoleRepository organizationRoleRepository { get; }
+    IActivityLogRepository ActivityLogs { get; }
+    IDomainVerificationRepository DomainVerifications { get; }
+    IExternalAuthRepository ExternalAuths { get; }
+    IInvitationRepository Invitations { get; }
+    ILeadRepository Leads { get; }
+    IOrganizationRoleRepository organizationRoleRepository { get; }
+    IOrganizationRepository Organizations { get; }
+    IRefreshTokenRepository RefreshTokens { get; }
+    IStripeSubscriptionRepository StripeSubscriptions { get; }
+    IUserProfileRepository UserProfiles { get; }
 
-        Task<int> CompleteAsync();
-    }
+    Task<int> CompleteAsync();
+    void Dispose();
 }
