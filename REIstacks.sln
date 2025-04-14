@@ -40,6 +40,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture", "architectur
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{726F70C3-0F4C-442E-AD6B-0134359DCA99}"
+	ProjectSection(SolutionItems) = preProject
+		AddingController.MD = AddingController.MD
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REIstacks.ML.Integration", "REIstacks.ML.Integration\REIstacks.ML.Integration.csproj", "{EE643803-45DC-4B6D-ACC7-E40AEE78829B}"
 EndProject

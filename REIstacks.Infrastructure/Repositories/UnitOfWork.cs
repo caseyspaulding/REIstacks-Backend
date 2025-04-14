@@ -1,4 +1,5 @@
 ﻿using REIstacks.Application.Common;
+using REIstacks.Application.Interfaces.IRepositories;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Domain.Common;
 using REIstacks.Infrastructure.Data;
@@ -9,7 +10,7 @@ namespace REIstacks.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
         private readonly IDomainEventDispatcher _eventDispatcher;
-
+        public IContactRepository Contacts { get; }
         public IUserProfileRepository UserProfiles { get; }
         public IOrganizationRepository Organizations { get; }
         public ILeadRepository Leads { get; }
@@ -27,6 +28,7 @@ namespace REIstacks.Infrastructure.Repositories
             IUserProfileRepository userProfiles,
             IOrganizationRepository organizations,
             ILeadRepository leads,
+            IContactRepository contacts,
             IInvitationRepository invitations,
             IActivityLogRepository activityLogs,
             IRefreshTokenRepository refreshTokens,
@@ -41,6 +43,7 @@ namespace REIstacks.Infrastructure.Repositories
             UserProfiles = userProfiles;
             Organizations = organizations;
             Leads = leads;
+            Contacts = contacts;
             Invitations = invitations;
             ActivityLogs = activityLogs;
             RefreshTokens = refreshTokens;

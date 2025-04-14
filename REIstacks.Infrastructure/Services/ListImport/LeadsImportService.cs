@@ -42,6 +42,8 @@ namespace REIstacks.Infrastructure.Services.ListImport
                 OrganizationId = organizationId,
                 FileName = file.FileName,
                 BlobUrl = blobUrl,
+                MappingConfig = "{}",
+                Tags = "",
                 UploadedAt = DateTime.UtcNow
             };
 
@@ -90,7 +92,9 @@ namespace REIstacks.Infrastructure.Services.ListImport
                 FileId = request.LeadListFileId,
                 OrganizationId = leadListFile.OrganizationId,
                 Status = "InProgress",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                StartedAt = DateTime.UtcNow,
+                ErrorMessage = ""
             };
 
             await _db.ImportJobs.AddAsync(importJob);
@@ -107,18 +111,51 @@ namespace REIstacks.Infrastructure.Services.ListImport
             importJob.Status = result.Success ? "Completed" : "Failed";
             importJob.CompletedAt = DateTime.UtcNow;
             importJob.TotalImported = result.TotalImported;
+            importJob.RecordsProcessed = result.TotalRows;
+            importJob.RecordsImported = result.TotalImported;
+            importJob.RecordsRejected = result.TotalRows - result.TotalImported;
 
             // Record each error (if any) in the import error log.
-            if (!result.Success || (result.Errors != null && result.Errors.Count > 0))
+            if (!result.Success || result.Errors?.Count > 0)
             {
                 foreach (var errorMsg in result.Errors)
                 {
+                    // Extract row number and field from error message
+                    int rowNumber = 0;
+                    string fieldName = "General";
+
+                    // Extract row number if available
+                    if (errorMsg.Contains("Row "))
+                    {
+                        var startIndex = errorMsg.IndexOf("Row ") + 4;
+                        var endIndex = errorMsg.IndexOf(":", startIndex);
+                        if (endIndex > startIndex && int.TryParse(errorMsg.Substring(startIndex, endIndex - startIndex), out int parsedRow))
+                        {
+                            rowNumber = parsedRow;
+                        }
+                    }
+
+                    // Extract field name if available
+                    if (errorMsg.Contains("Field: "))
+                    {
+                        var startIndex = errorMsg.IndexOf("Field: ") + 7;
+                        var endIndex = errorMsg.IndexOf(")", startIndex);
+                        if (endIndex > startIndex)
+                        {
+                            fieldName = errorMsg.Substring(startIndex, endIndex - startIndex);
+                        }
+                    }
+
                     var importError = new ImportError
                     {
                         JobId = importJob.Id,
                         ErrorMessage = errorMsg,
+                        Field = fieldName,
+                        RowNumber = rowNumber,
+                        OrganizationId = leadListFile.OrganizationId,
                         OccurredAt = DateTime.UtcNow
                     };
+
                     await _db.ImportErrors.AddAsync(importError);
                 }
             }
@@ -126,12 +163,21 @@ namespace REIstacks.Infrastructure.Services.ListImport
             _db.ImportJobs.Update(importJob);
             await _db.SaveChangesAsync();
 
+            // Mark file as processed
+            leadListFile.IsProcessed = true;
+            leadListFile.ProcessedAt = DateTime.UtcNow;
+            leadListFile.RecordsCount = result.TotalImported;
+            _db.LeadListFiles.Update(leadListFile);
+            await _db.SaveChangesAsync();
+
             // Return a response object for the finalize import operation.
             return new
             {
                 success = result.Success,
                 totalImported = result.TotalImported,
-                errors = result.Errors
+                totalProcessed = result.TotalRows,
+                errors = result.Errors,
+                jobId = importJob.Id
             };
         }
     }

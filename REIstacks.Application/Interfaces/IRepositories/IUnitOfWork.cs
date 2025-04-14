@@ -1,6 +1,9 @@
-﻿namespace REIstacks.Application.Repositories.Interfaces;
+﻿using REIstacks.Application.Interfaces.IRepositories;
+
+namespace REIstacks.Application.Repositories.Interfaces;
 public interface IUnitOfWork
 {
+    IContactRepository Contacts { get; }
     IActivityLogRepository ActivityLogs { get; }
     IDomainVerificationRepository DomainVerifications { get; }
     IExternalAuthRepository ExternalAuths { get; }

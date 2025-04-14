@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using REIstacks.Application.Common;
 using REIstacks.Application.Common.EventHandlers;
 using REIstacks.Application.Interfaces;
+using REIstacks.Application.Interfaces.IRepositories;
 using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Application.Services.Interfaces;
@@ -14,6 +15,7 @@ using REIstacks.Infrastructure.Data;
 using REIstacks.Infrastructure.EventDispatching;
 using REIstacks.Infrastructure.Repositories;
 using REIstacks.Infrastructure.Repositories.Authentication;
+using REIstacks.Infrastructure.Repositories.CRM;
 using REIstacks.Infrastructure.Repositories.LeadGeneration;
 using REIstacks.Infrastructure.Repositories.Marketing;
 using REIstacks.Infrastructure.Repositories.Organizations;
@@ -21,6 +23,8 @@ using REIstacks.Infrastructure.Repositories.Users;
 using REIstacks.Infrastructure.Services;
 using REIstacks.Infrastructure.Services.Authentication;
 using REIstacks.Infrastructure.Services.Communications;
+using REIstacks.Infrastructure.Services.CRM;
+using REIstacks.Infrastructure.Services.ListImport;
 using REIstacks.Infrastructure.Services.Organizations;
 using REIstacks.Infrastructure.Services.Storage;
 
@@ -51,6 +55,8 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         // Register repositories and Services here
+        services.AddScoped<IContactRepository, ContactRepository>();
+        services.AddScoped<IContactService, ContactService>();
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
@@ -69,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+        services.AddScoped<ILeadsImportService, LeadsImportService>();
         services.AddHttpClient();
         services.Scan(scan => scan
             .FromAssemblyOf<IDomainEventHandler<IDomainEvent>>()
@@ -78,7 +85,7 @@ public static class DependencyInjection
 
         services.AddTransient<ISmsService, AzureSmsService>();
 
-        //services.AddScoped<ICsvImportService, CsvImportService>();
+        services.AddScoped<ICsvImportService, CsvImportService>();
         services.AddScoped<EventGridPublisher>(sp =>
         {
             var topicEndpoint = configuration["EventGrid:TopicEndpoint"];

@@ -30,7 +30,7 @@ public class ImportJob
 
     public DateTime? CreatedAt { get; set; }
 
-    public string ErrorMessage { get; set; }
+    public string ErrorMessage { get; set; } = "";
 
     public int? RecordsProcessed { get; set; }
 

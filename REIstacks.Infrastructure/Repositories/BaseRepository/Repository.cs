@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
+using REIstacks.Domain.Common;
 using REIstacks.Domain.Repositories;
 using REIstacks.Infrastructure.Data;
 using System.Linq.Expressions;
@@ -16,7 +16,33 @@ namespace REIstacks.Infrastructure.Repositories.BaseRepository
             Context = context;
             DbSet = context.Set<TEntity>();
         }
+        public virtual async Task<PaginatedResult<TEntity>> GetPaginatedAsync(
+            Expression<Func<TEntity, bool>> filter = null,
+            int page = 1,
+            int pageSize = 20,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null)
+        {
+            IQueryable<TEntity> query = DbSet;
 
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PaginatedResult<TEntity>(items, totalCount, page, pageSize);
+        }
         public virtual async Task<TEntity> GetByIdAsync(object id)
         {
             // If id is a string but the entity has a Guid Id property, try to convert

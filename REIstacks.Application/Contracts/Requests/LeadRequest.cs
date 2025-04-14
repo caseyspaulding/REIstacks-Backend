@@ -19,7 +19,7 @@
         public string? PropertyCity { get; set; }
         public string? PropertyState { get; set; }
         public string? PropertyZipCode { get; set; }
-
+        public string OrganizationId { get; set; }
         public string? PropertyType { get; set; }
         public string[] PropertyCondition { get; set; }
         public Dictionary<string, string> PropertyIssues { get; set; }

@@ -1,10 +1,12 @@
 ﻿using CsvHelper;
+using Microsoft.EntityFrameworkCore;
 using REIstacks.Application.Interfaces;
 using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Application.Interfaces.Models;
 using REIstacks.Domain.Entities.CRM;
 using REIstacks.Infrastructure.Data;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace REIstacks.Infrastructure.Services.ListImport
 {
@@ -12,6 +14,15 @@ namespace REIstacks.Infrastructure.Services.ListImport
     {
         private readonly AppDbContext _context;
         private readonly IStorageService _storageService;
+        private readonly List<string> _possibleFields = new List<string>
+        {
+            "FirstName", "LastName", "Email", "Phone", "AlternatePhone",
+            "Company", "Title", "PreferredContactMethod",
+            "StreetAddress", "City", "State", "ZipCode",
+            "ContactType", "LeadSource", "Tags", "Notes",
+            "ConsentTextMessages", "ConsentEmailMarketing"
+        };
+        private const int BatchSize = 100;
 
         public CsvImportService(AppDbContext context, IStorageService storageService)
         {
@@ -19,17 +30,11 @@ namespace REIstacks.Infrastructure.Services.ListImport
             _storageService = storageService;
         }
 
-        /// <summary>
-        /// Uploads a CSV file to blob storage and returns its Blob URL.
-        /// </summary>
         public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string organizationId)
         {
             return await _storageService.UploadFileAsync(fileStream, fileName, organizationId);
         }
 
-        /// <summary>
-        /// Reads CSV headers and a few sample rows, then auto-suggests column mappings.
-        /// </summary>
         public async Task<PreviewResult> GetPreviewAsync(Stream fileStream, int sampleRows = 5)
         {
             var preview = new PreviewResult();
@@ -37,13 +42,14 @@ namespace REIstacks.Infrastructure.Services.ListImport
             using var reader = new StreamReader(fileStream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
-            // 1) Read headers
+            // Read headers
             csv.Read();
             csv.ReadHeader();
-            preview.Headers = csv.HeaderRecord.ToList();
+            preview.Headers = csv.HeaderRecord?.ToList() ?? new List<string>();
 
-            // 2) Read sample rows
+            // Read sample rows
             int count = 0;
+            preview.Rows = new List<Dictionary<string, string>>();
             while (csv.Read() && count < sampleRows)
             {
                 var row = new Dictionary<string, string>();
@@ -55,19 +61,13 @@ namespace REIstacks.Infrastructure.Services.ListImport
                 count++;
             }
 
-            // 3) Suggest field mappings for the user
+            // Suggest field mappings
             preview.SuggestedMappings = SuggestFieldMappings(preview.Headers);
 
             return preview;
         }
 
-        /// <summary>
-        /// Checks whether required columns exist in CSV headers.
-        /// Throws an exception if any required column is missing.
-        /// </summary>
-        public void ValidateRequiredColumns(
-            IReadOnlyList<string> csvHeaders,
-            IReadOnlyList<string> requiredColumns)
+        public void ValidateRequiredColumns(IReadOnlyList<string> csvHeaders, IReadOnlyList<string> requiredColumns)
         {
             var missing = requiredColumns
                 .Where(rc => !csvHeaders.Contains(rc, StringComparer.OrdinalIgnoreCase))
@@ -80,27 +80,13 @@ namespace REIstacks.Infrastructure.Services.ListImport
             }
         }
 
-        /// <summary>
-        /// Suggests default mappings for CSV column headers to known contact fields.
-        /// </summary>
         public Dictionary<string, string> SuggestFieldMappings(IReadOnlyList<string> csvHeaders)
         {
             var suggestions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            // A list of known contact fields in your DB.
-            var possibleFields = new List<string>
-            {
-                "FirstName", "LastName", "Email", "Phone", "AlternatePhone",
-                "Company", "Title", "PreferredContactMethod",
-                "StreetAddress", "City", "State", "ZipCode",
-                "ContactType", "LeadSource", "Tags", "Notes",
-                "ConsentTextMessages", "ConsentEmailMarketing"
-            };
-
             foreach (var header in csvHeaders)
             {
-                // Implement more sophisticated matching logic
-                var bestMatch = MatchHeader(header, possibleFields);
+                var bestMatch = MatchHeader(header, _possibleFields);
                 suggestions[header] = !string.IsNullOrEmpty(bestMatch)
                     ? bestMatch
                     : ""; // Leave unmapped fields blank
@@ -108,9 +94,6 @@ namespace REIstacks.Infrastructure.Services.ListImport
             return suggestions;
         }
 
-        /// <summary>
-        /// Match a CSV header to the closest field in our contacts table
-        /// </summary>
         private string MatchHeader(string header, List<string> possibleFields)
         {
             // Direct match
@@ -150,7 +133,7 @@ namespace REIstacks.Infrastructure.Services.ListImport
                 return "ZipCode";
             if (normalizedHeader.Contains("type") && normalizedHeader.Contains("contact"))
                 return "ContactType";
-            if (normalizedHeader.Contains("source") || normalizedHeader.Contains("lead") && normalizedHeader.Contains("source"))
+            if (normalizedHeader.Contains("source") || (normalizedHeader.Contains("lead") && normalizedHeader.Contains("source")))
                 return "LeadSource";
             if (normalizedHeader.Contains("tag"))
                 return "Tags";
@@ -165,33 +148,51 @@ namespace REIstacks.Infrastructure.Services.ListImport
             return "";
         }
 
-        /// <summary>
-        /// Basic row-level validation. For example, require that at least one contact field is present.
-        /// </summary>
-        private bool ValidateRow(Contact contact, out string errorMessage)
+        private bool ValidateRow(Contact contact, out string errorMessage, out string fieldName)
         {
             if (string.IsNullOrWhiteSpace(contact.Email) && string.IsNullOrWhiteSpace(contact.Phone))
             {
-                errorMessage = "Row missing both email and phone number.";
+                errorMessage = "Missing both email and phone number";
+                fieldName = "Email/Phone";
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(contact.FirstName) && string.IsNullOrWhiteSpace(contact.LastName))
             {
-                errorMessage = "Row missing both first name and last name.";
+                errorMessage = "Missing both first name and last name";
+                fieldName = "FirstName/LastName";
+                return false;
+            }
+
+            // Email format validation
+            if (!string.IsNullOrWhiteSpace(contact.Email) && !IsValidEmail(contact.Email))
+            {
+                errorMessage = $"Invalid email format: {contact.Email}";
+                fieldName = "Email";
+                return false;
+            }
+
+            // Phone format validation
+            if (!string.IsNullOrWhiteSpace(contact.Phone) && !IsValidPhone(contact.Phone))
+            {
+                errorMessage = $"Invalid phone format: {contact.Phone}";
+                fieldName = "Phone";
                 return false;
             }
 
             errorMessage = null;
+            fieldName = null;
             return true;
         }
 
-        /// <summary>
-        /// Checks if the given contact is a duplicate by using a composite key (Email + Phone).
-        /// </summary>
         private bool IsDuplicate(Contact contact, HashSet<string> seenKeys)
         {
-            var key = $"{(contact.Email ?? "")}#{(contact.Phone ?? "")}";
+            var key = $"{contact.Email ?? ""}#{contact.Phone ?? ""}";
+            if (string.IsNullOrWhiteSpace(key.Replace("#", "")))
+            {
+                return false; // Can't determine duplication without email or phone
+            }
+
             if (seenKeys.Contains(key))
             {
                 return true;
@@ -201,9 +202,24 @@ namespace REIstacks.Infrastructure.Services.ListImport
             return false;
         }
 
-        /// <summary>
-        /// Downloads the CSV from storage, then processes it into the database using the provided field mappings.
-        /// </summary>
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool IsValidPhone(string phone)
+        {
+            return Regex.IsMatch(phone, @"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$");
+        }
+
         public async Task<ImportResult> ProcessFileFromStorageAsync(
             string blobUrl,
             Dictionary<string, string> fieldMappings,
@@ -213,15 +229,19 @@ namespace REIstacks.Infrastructure.Services.ListImport
             return await ProcessCsvFile(fileStream, fieldMappings, organizationId);
         }
 
-        /// <summary>
-        /// Main CSV import logic – reads CSV rows, applies mappings, and inserts contacts into DB.
-        /// </summary>
         public async Task<ImportResult> ProcessCsvFile(
             Stream fileStream,
             Dictionary<string, string> fieldMappings,
             string organizationId)
         {
-            var result = new ImportResult();
+            var result = new ImportResult
+            {
+                Success = true,
+                TotalImported = 0,
+                TotalRows = 0,
+                Errors = new List<string>()
+            };
+
             using var reader = new StreamReader(fileStream);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
@@ -229,15 +249,17 @@ namespace REIstacks.Infrastructure.Services.ListImport
             csv.Read();
             csv.ReadHeader();
 
-            var contacts = new List<Contact>();
             var duplicates = new HashSet<string>();
-            var totalRows = 0;
+            var currentBatch = new List<Contact>(BatchSize);
+
+            // Start a transaction for the entire import process
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
                 while (csv.Read())
                 {
-                    totalRows++;
+                    result.TotalRows++;
                     var contact = new Contact
                     {
                         OrganizationId = organizationId,
@@ -262,32 +284,43 @@ namespace REIstacks.Infrastructure.Services.ListImport
                         }
                     }
 
-                    // Optional row-level validation
-                    if (!ValidateRow(contact, out string validationError))
+                    // Row-level validation
+                    if (!ValidateRow(contact, out string validationError, out string fieldName))
                     {
-                        result.Errors.Add($"Row {csv.Context.Parser.Row}: {validationError}");
-                        continue; // skip adding to contacts
+                        result.Errors.Add($"Row {csv.Context.Parser.Row}: {validationError} (Field: {fieldName})");
+                        continue; // Skip adding to contacts
                     }
 
-                    // Optional duplication check
+                    // Duplication check
                     if (IsDuplicate(contact, duplicates))
                     {
-                        result.Errors.Add($"Row {csv.Context.Parser.Row}: Duplicate Email/Phone: {contact.Email}/{contact.Phone}");
-                        continue; // skip adding to contacts
+                        result.Errors.Add($"Row {csv.Context.Parser.Row}: Duplicate Email/Phone: {contact.Email ?? "N/A"}/{contact.Phone ?? "N/A"} (Field: Email/Phone)");
+                        continue; // Skip adding to contacts
                     }
 
-                    contacts.Add(contact);
+                    currentBatch.Add(contact);
+
+                    // Process batch if it reaches the batch size
+                    if (currentBatch.Count >= BatchSize)
+                    {
+                        await ProcessBatch(currentBatch, result);
+                        currentBatch.Clear();
+                    }
                 }
 
-                await _context.Contacts.AddRangeAsync(contacts);
-                await _context.SaveChangesAsync();
+                // Process any remaining contacts
+                if (currentBatch.Any())
+                {
+                    await ProcessBatch(currentBatch, result);
+                }
 
-                result.TotalImported = contacts.Count;
-                result.Success = true;
-                result.TotalRows = totalRows;
+                // Commit transaction if everything succeeded
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
+                // Rollback on error
+                await transaction.RollbackAsync();
                 result.Success = false;
                 result.Errors.Add($"Database error: {ex.Message}");
             }
@@ -295,13 +328,30 @@ namespace REIstacks.Infrastructure.Services.ListImport
             return result;
         }
 
-        /// <summary>
-        /// Maps a single CSV column's value onto the correct field in the Contact entity.
-        /// </summary>
+        private async Task ProcessBatch(List<Contact> batch, ImportResult result)
+        {
+            try
+            {
+                await _context.Contacts.AddRangeAsync(batch);
+                await _context.SaveChangesAsync();
+                result.TotalImported += batch.Count;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Errors.Add($"Database error processing batch: {ex.Message}");
+                // Re-throw to trigger transaction rollback
+                throw;
+            }
+        }
+
         private void ApplyValueToContact(Contact contact, string field, string value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return;
+
+            // Trim whitespace from all values
+            value = value.Trim();
 
             switch (field)
             {
@@ -322,12 +372,12 @@ namespace REIstacks.Infrastructure.Services.ListImport
                 case "Tags": contact.Tags = value; break;
                 case "Notes": contact.Notes = value; break;
                 case "ConsentTextMessages":
-                    if (bool.TryParse(value, out bool consentText))
-                        contact.ConsentTextMessages = consentText;
+                    bool.TryParse(value, out bool consentText);
+                    contact.ConsentTextMessages = consentText;
                     break;
                 case "ConsentEmailMarketing":
-                    if (bool.TryParse(value, out bool consentEmail))
-                        contact.ConsentEmailMarketing = consentEmail;
+                    bool.TryParse(value, out bool consentEmail);
+                    contact.ConsentEmailMarketing = consentEmail;
                     break;
             }
         }

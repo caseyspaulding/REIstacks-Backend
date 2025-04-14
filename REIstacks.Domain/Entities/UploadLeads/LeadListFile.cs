@@ -24,11 +24,10 @@ public class LeadListFile
 
     public string MappingConfig { get; set; }
 
-    public string Tags { get; set; }
+    public string Tags { get; set; } = string.Empty;
 
     public int? RecordsCount { get; set; }
 
-    [Required]
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 
     public bool IsProcessed { get; set; } = false;
