@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-// Add this using directive to resolve 'UserProfile'
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
