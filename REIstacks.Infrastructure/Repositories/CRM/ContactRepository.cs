@@ -62,19 +62,20 @@ public class ContactRepository : Repository<Contact>, IContactRepository
             .ToListAsync();
     }
 
-    public Task<Contact> GetByIdAsync(int id)
+    public async Task<Contact> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Contacts.FindAsync(id);
     }
 
-    Task<int> IContactRepository.AddAsync(Contact contact)
+    async Task<int> IContactRepository.AddAsync(Contact contact)
     {
-        throw new NotImplementedException();
+        await _context.Contacts.AddAsync(contact);
+        return contact.Id;
     }
 
     public void Delete(Contact contact)
     {
-        throw new NotImplementedException();
+        _context.Contacts.Remove(contact);
     }
 
     public Task<bool> ExistsAsync(int id)

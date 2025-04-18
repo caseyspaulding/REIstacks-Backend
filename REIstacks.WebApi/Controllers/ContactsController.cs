@@ -1,6 +1,7 @@
 ﻿// REIstacks.Api/Controllers/ContactsController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using REIstacks.Application.Contracts.Requests;
 using REIstacks.Application.Services.Interfaces;
 using REIstacks.Domain.Entities.CRM;
 
@@ -30,9 +31,52 @@ public class ContactsController : ControllerBase
 
             var (contacts, totalCount, totalPages) = await _contactService.GetPagedContactsAsync(page, pageSize, organizationId);
 
+            // Map to DTOs to avoid circular references
+            var contactDtos = contacts.Select(c => new ContactDto
+            {
+                Id = c.Id,
+                OrganizationId = c.OrganizationId,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                Email = c.Email,
+                Phone = c.Phone,
+                AlternatePhone = c.AlternatePhone,
+                Company = c.Company,
+                Title = c.Title,
+                PreferredContactMethod = c.PreferredContactMethod,
+                StreetAddress = c.StreetAddress,
+                City = c.City,
+                State = c.State,
+                ZipCode = c.ZipCode,
+                IsActive = c.IsActive,
+                ContactType = c.ContactType,
+                LeadSource = c.LeadSource,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt,
+                Tags = c.Tags,
+                Notes = c.Notes,
+                Clicks = c.Clicks,
+                Opens = c.Opens,
+                SMSResponses = c.SMSResponses,
+                CallsMade = c.CallsMade,
+                MessagesLeft = c.MessagesLeft,
+                LastContacted = c.LastContacted,
+                ConsentTextMessages = c.ConsentTextMessages,
+                ConsentEmailMarketing = c.ConsentEmailMarketing,
+
+                // Organization data
+                OrganizationName = c.Organization?.Name,
+
+                // Counts instead of collections
+                PropertiesCount = c.Properties?.Count ?? 0,
+                DealsCount = c.Deals?.Count ?? 0,
+                CommunicationsCount = c.Communications?.Count ?? 0,
+                TasksCount = c.Tasks?.Count ?? 0
+            }).ToList();
+
             return Ok(new
             {
-                data = contacts,
+                data = contactDtos,
                 total = totalCount,
                 totalPages = totalPages,
                 page = page,
@@ -41,7 +85,14 @@ public class ContactsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = ex.Message });
+            // Log the FULL exception details
+            Console.WriteLine($"ERROR: {ex.Message}");
+            Console.WriteLine($"STACK: {ex.StackTrace}");
+
+            if (ex.InnerException != null)
+                Console.WriteLine($"INNER: {ex.InnerException.Message}");
+
+            return StatusCode(500, new { error = $"Contact retrieval failed: {ex.Message}" });
         }
     }
 
