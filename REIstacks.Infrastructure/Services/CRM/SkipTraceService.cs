@@ -1,116 +1,138 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// REIstacks.Infrastructure.Services.CRM/SkipTraceService.cs
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using REIstacks.Application.Contracts.Requests;
 using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Domain.Entities.CRM;
 using REIstacks.Infrastructure.Data;
 using System.Net.Http.Json;
 
-namespace REIstacks.Infrastructure.Services.CRM;
-public class SkipTraceService : ISkipTraceService
+namespace REIstacks.Infrastructure.Services.CRM
 {
-    private readonly AppDbContext _db;
-    private readonly HttpClient _http;
-    private readonly string _apifyToken;
-
-    public SkipTraceService(
-           AppDbContext db,
-           HttpClient http,
-           IConfiguration config)      // ← new
+    public class SkipTraceService : ISkipTraceService
     {
-        _db = db;
-        _http = http;
-        // read from config (falls back to environment variable APIFY_TOKEN)
-        _apifyToken = config["APIFY_TOKEN"]
-                     ?? throw new InvalidOperationException("APIFY_TOKEN is not configured");
-    }
+        private readonly AppDbContext _db;
+        private readonly HttpClient _http;
+        private readonly string _apifyToken;
 
-    public async Task<SkipTraceActivity> StartSkipTraceAsync(IEnumerable<int> contactIds, string organizationId)
-    {
-        // 1) create a new activity
-        var activity = new SkipTraceActivity
+        public SkipTraceService(
+            AppDbContext db,
+            HttpClient http,
+            IConfiguration config)
         {
-            OrganizationId = organizationId,
-            Status = SkipTraceStatus.Pending,
-            CompletedAt = DateTime.UtcNow
-        };
-        _db.SkipTraceActivities.Add(activity);
-        await _db.SaveChangesAsync();
+            _db = db;
+            _http = http;
+            _apifyToken = config["APIFY_TOKEN"]
+                       ?? throw new InvalidOperationException("APIFY_TOKEN is not configured");
+        }
 
-        // 2) lookup the contacts, build the Apify payload
-        var contacts = await _db.Contacts
-            .Where(c => contactIds.Contains(c.Id) && c.OrganizationId == organizationId)
-            .Select(c => new { c.FirstName, c.LastName, c.StreetAddress, c.City, c.State, c.ZipCode })
-            .ToListAsync();
-
-        var apifyInput = new
+        public async Task<IEnumerable<AddressCsvDto>> GetAddressesByContactIdsAsync(
+            IEnumerable<int> contactIds,
+            string organizationId)
         {
-            /* transform each contact into the input Apify expects */
-            data = contacts.Select(c => new
-            {
-                name = $"{c.FirstName} {c.LastName}",
-                address = new
+            // pull out only the fields needed by your AddressCsvDto
+            return await _db.Contacts
+                .Where(c => contactIds.Contains(c.Id)
+                         && c.OrganizationId == organizationId)
+                .Select(c => new AddressCsvDto
                 {
-                    streetAddress = c.StreetAddress,
-                    addressLocality = c.City,
-                    addressRegion = c.State,
-                    postalCode = c.ZipCode
-                }
-            })
-        };
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    StreetAddress = c.StreetAddress,
+                    City = c.City,
+                    State = c.State,
+                    ZipCode = c.ZipCode
+                })
+                .ToListAsync();
+        }
 
-        // 3) fire off the Apify actor asynchronously:
-        var response = await _http.PostAsJsonAsync(
-            $"https://api.apify.com/v2/acts/sorower~skip-trace/run-sync-get-dataset-items?token={_apifyToken}",
-            apifyInput);
-
-        response.EnsureSuccessStatusCode();
-        var items = await response.Content.ReadFromJsonAsync<List<SkipTraceItem>>();
-
-        // 4) write everything back into your database
-        activity.Status = SkipTraceStatus.Completed;
-        activity.RawResponseJson = await response.Content.ReadAsStringAsync();
-        activity.CompletedAt = DateTime.UtcNow;
-        activity.ProcessedCount = items?.Count ?? 0;
-
-        // breakdown by category
-        var breakdowns = items
-           .GroupBy(i => i.Category)
-           .Select(g => new SkipTraceBreakdown
-           {
-               SkipTraceActivityId = activity.Id,
-               Category = g.Key,
-               Count = g.Count()
-           });
-
-        await _db.SkipTraceBreakdowns.AddRangeAsync(breakdowns);
-        await _db.SkipTraceItems.AddRangeAsync(items.Select(i =>
+        public async Task<SkipTraceActivity> StartSkipTraceByAddressesAsync(
+            IEnumerable<AddressCsvDto> addresses,
+            string organizationId)
         {
-            i.SkipTraceActivityId = activity.Id;
-            return i;
-        }));
+            // 1) create a new activity
+            var activity = new SkipTraceActivity
+            {
+                OrganizationId = organizationId,
+                Status = SkipTraceStatus.Pending,
+                CompletedAt = DateTime.UtcNow
+            };
+            _db.SkipTraceActivities.Add(activity);
+            await _db.SaveChangesAsync();
 
-        await _db.SaveChangesAsync();
-        return activity;
-    }
+            // 2) build Apify payload
+            var apifyInput = new
+            {
+                data = addresses.Select(a => new
+                {
+                    name = $"{a.FirstName} {a.LastName}",
+                    address = new
+                    {
+                        streetAddress = a.StreetAddress,
+                        addressLocality = a.City,
+                        addressRegion = a.State,
+                        postalCode = a.ZipCode
+                    }
+                })
+            };
 
-    public async Task<IEnumerable<SkipTraceActivity>> GetActivitiesAsync(string organizationId) =>
-        await _db.SkipTraceActivities
-            .Where(a => a.OrganizationId == organizationId)
-            .ToListAsync();
+            // 3) call Apify
+            var url = $"https://api.apify.com/v2/acts/sorower~skip-trace/"
+                    + $"run-sync-get-dataset-items?token={_apifyToken}";
+            var response = await _http.PostAsJsonAsync(url, apifyInput);
+            response.EnsureSuccessStatusCode();
 
-    public async Task<SkipTraceActivity?> GetActivityByIdAsync(int id, string organizationId) =>
-        await _db.SkipTraceActivities
-            .Include(a => a.Breakdown)
-            .Include(a => a.Items)
-            .FirstOrDefaultAsync(a => a.Id == id && a.OrganizationId == organizationId);
+            // 4) read raw JSON + parse flat items
+            var rawJson = await response.Content.ReadAsStringAsync();
+            var items = await response.Content
+                                     .ReadFromJsonAsync<List<SkipTraceItem>>();
 
-    public async Task<bool> CancelActivityAsync(int id, string organizationId)
-    {
-        var activity = await _db.SkipTraceActivities
-            .FirstOrDefaultAsync(a => a.Id == id && a.OrganizationId == organizationId);
-        if (activity == null) return false;
-        activity.Status = SkipTraceStatus.Cancelled;
-        await _db.SaveChangesAsync();
-        return true;
+            // 5) persist results
+            activity.RawResponseJson = rawJson;
+            activity.CompletedAt = DateTime.UtcNow;
+            activity.ProcessedCount = items?.Count ?? 0;
+            activity.Status = SkipTraceStatus.Completed;
+
+            // if you need breakdowns by a property on SkipTraceItem, do it here:
+            // e.g. group by i.SomeCategory and save SkipTraceBreakdown
+
+            await _db.SaveChangesAsync();
+            return activity;
+        }
+
+        public async Task<SkipTraceActivity> StartSkipTraceAsync(
+            IEnumerable<int> contactIds,
+            string organizationId)
+        {
+            // optional: you can now simply delegate to the above two methods:
+            var rows = await GetAddressesByContactIdsAsync(contactIds, organizationId);
+            var activity = await StartSkipTraceByAddressesAsync(rows, organizationId);
+            return activity;
+        }
+
+        public async Task<IEnumerable<SkipTraceActivity>> GetActivitiesAsync(string organizationId) =>
+            await _db.SkipTraceActivities
+                .Where(a => a.OrganizationId == organizationId)
+                .ToListAsync();
+
+        public async Task<SkipTraceActivity?> GetActivityByIdAsync(int id, string organizationId) =>
+            await _db.SkipTraceActivities
+                .Include(a => a.Breakdown)
+                .Include(a => a.Items)
+                .FirstOrDefaultAsync(a => a.Id == id
+                                       && a.OrganizationId == organizationId);
+
+        public async Task<bool> CancelActivityAsync(int id, string organizationId)
+        {
+            var activity = await _db.SkipTraceActivities
+                .FirstOrDefaultAsync(a => a.Id == id
+                                       && a.OrganizationId == organizationId);
+            if (activity == null) return false;
+
+            activity.Status = SkipTraceStatus.Cancelled;
+            await _db.SaveChangesAsync();
+            return true;
+        }
     }
 }
