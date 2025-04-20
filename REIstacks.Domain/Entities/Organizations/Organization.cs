@@ -81,6 +81,10 @@ namespace REIstacks.Domain.Entities.Organizations
         public virtual ICollection<PropertyNote> PropertyNotes { get; set; } = new List<PropertyNote>();
         public virtual ICollection<ImportJob> ImportJobs { get; set; } = new List<ImportJob>();
         public virtual ICollection<Board> Boards { get; set; } = new List<Board>();
+        public virtual ICollection<Opportunity> Opportunities { get; set; } = new List<Opportunity>();
+        public virtual ICollection<Offer> Offers { get; set; } = new List<Offer>();
+        public virtual ICollection<OfferDocument> OfferDocuments { get; set; } = new List<OfferDocument>();
+        public virtual ICollection<LeadStage> LeadStages { get; set; } = new List<LeadStage>();
         public virtual ICollection<MarketingCampaign> MarketingCampaigns { get; set; } = new List<MarketingCampaign>();
     }
 

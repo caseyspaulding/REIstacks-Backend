@@ -108,5 +108,6 @@ public class Property
     public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
     public virtual ICollection<TaskItem> TaskItems { get; set; } = new List<TaskItem>();
     public virtual ICollection<PropertyDocument> Documents { get; set; } = new List<PropertyDocument>();
+    public virtual ICollection<Opportunity> Opportunities { get; set; } = new List<Opportunity>();
     public virtual ICollection<DirectMailCampaign> DirectMailCampaigns { get; set; } = new List<DirectMailCampaign>();
 }

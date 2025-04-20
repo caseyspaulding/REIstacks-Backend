@@ -30,33 +30,48 @@ public class PropertyImagesController : TenantController
             .ToListAsync();
         return Ok(images);
     }
+
+
     [ApiExplorerSettings(IgnoreApi = true)]
-    [HttpPost, DisableRequestSizeLimit]
-    [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Upload(
-     int propertyId,
-     [FromForm] IFormFile file,
-     [FromForm] int sortOrder = 0)
+    [HttpPost]
+    public async Task<IActionResult> UploadImage(
+            int propertyId,
+            IFormFile file)
     {
-        if (file == null) return BadRequest();
+        if (file == null || file.Length == 0)
+            return BadRequest("No image provided.");
 
-        // upload to your blob container, namespaced by org
+        // 1) Upload to your blob container (assumes your BlobStorageService 
+        //    uses a "property‑images" container from config)
         var url = await _storage.UploadFileAsync(
-                      file.OpenReadStream(),
-                      file.FileName,
-                      OrgId        // your TenantController property
-                  );
+            file.OpenReadStream(),
+            file.FileName,
+            OrgId
+        );
 
-        var img = new PropertyImage
+        // 2) Determine next sort order
+        var nextSort = await _db.PropertyImages
+            .Where(pi => pi.PropertyId == propertyId)
+            .MaxAsync(pi => (int?)pi.SortOrder) ?? 0;
+        nextSort++;
+
+        // 3) Persist a PropertyImage record
+        var image = new PropertyImage
         {
             PropertyId = propertyId,
             Url = url,
-            SortOrder = sortOrder
+            SortOrder = nextSort,
+            UploadedAt = DateTime.UtcNow
         };
-        _db.PropertyImages.Add(img);
+        _db.PropertyImages.Add(image);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(Get), new { propertyId }, img);
+        return Ok(new
+        {
+            id = image.Id,
+            url = image.Url,
+            sortOrder = image.SortOrder
+        });
     }
 
     [HttpDelete("{id:int}")]

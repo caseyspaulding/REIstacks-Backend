@@ -3,4 +3,5 @@ public interface IStorageService
 {
     Task<string> UploadFileAsync(Stream fileStream, string fileName, string organizationId);
     Task<Stream> DownloadFileAsync(string blobUrl);
+    Task<string> UploadPropertyImageFileAsync(Stream fileStream, string fileName, string organizationId);
 }

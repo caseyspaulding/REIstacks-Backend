@@ -159,6 +159,18 @@ namespace REIstacks.Domain.Entities.CRM
         [ForeignKey("CampaignId")]
         public virtual MarketingCampaign Campaign { get; set; }
 
+        /// <summary>
+        /// This is the *one and only* FK to your LeadStage table.
+        /// </summary>
+        public int? LeadStageId { get; set; }
+
+        /// <summary>
+        /// Annotate the navigation so EF Core knows to use LeadStageId.
+        /// </summary>
+        [ForeignKey(nameof(LeadStageId))]
+        public virtual LeadStage? LeadStage { get; set; }
+
+
         // Helper methods for JSON conversion
         public void SetPropertyCondition(string[] conditions)
         {

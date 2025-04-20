@@ -9,6 +9,7 @@ public class BlobStorageService : IStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly string _containerName;
+    private readonly string _propertyImagesContainer;
 
     public BlobStorageService(IConfiguration configuration)
     {
@@ -16,6 +17,28 @@ public class BlobStorageService : IStorageService
         _blobServiceClient = new BlobServiceClient(connectionString);
         // Ensure container name is in lower-case (as required by Azure)
         _containerName = configuration["AzureStorage:LeadListsContainer"].ToLowerInvariant();
+        _propertyImagesContainer = configuration["AzureStorage:PropertyImagesContainer"].ToLowerInvariant();
+    }
+
+    public async Task<string> UploadPropertyImageFileAsync(Stream fileStream, string fileName, string organizationId)
+          => await UploadToContainerAsync(fileStream, fileName, organizationId, _propertyImagesContainer);
+    private async Task<string> UploadToContainerAsync(
+          Stream fileStream,
+          string fileName,
+          string organizationId,
+          string containerName)
+    {
+        var container = _blobServiceClient.GetBlobContainerClient(containerName);
+        await container.CreateIfNotExistsAsync();
+
+        // e.g. "org-id/property-images/uniqueguuid-filename.jpg"
+        var path = $"{organizationId}/{Guid.NewGuid()}-{fileName}";
+        var blob = container.GetBlobClient(path);
+
+        var contentType = GetContentTypeFromFileName(fileName);
+        await blob.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = contentType });
+
+        return blob.Uri.ToString();
     }
 
     public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string organizationId)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REIstacks.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using REIstacks.Infrastructure.Data;
 namespace REIstacks.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250420192757_AddOpportunities")]
+    partial class AddOpportunities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,21 +437,7 @@ namespace REIstacks.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("LeadConvertedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("LeadOwnerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("LeadSource")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("LeadStageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LeadStatus")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -503,8 +492,6 @@ namespace REIstacks.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LeadStageId");
 
                     b.HasIndex("StatusId");
 
@@ -651,9 +638,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Property<bool>("ConsentTextMessages")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ContactId")
-                        .HasColumnType("int");
-
                     b.Property<decimal?>("CostPerLead")
                         .HasColumnType("decimal(18,2)");
 
@@ -694,9 +678,6 @@ namespace REIstacks.Infrastructure.Migrations
 
                     b.Property<string>("LeadSource")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("LeadStageId")
-                        .HasColumnType("int");
 
                     b.Property<string>("LeadStatus")
                         .HasColumnType("nvarchar(max)");
@@ -814,43 +795,9 @@ namespace REIstacks.Infrastructure.Migrations
 
                     b.HasIndex("CampaignId");
 
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("LeadStageId");
-
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("leads");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.LeadStage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("lead_stages");
                 });
 
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.List", b =>
@@ -1394,9 +1341,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Property<int?>("OpportunityId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("PropertyId")
                         .HasColumnType("int");
 
@@ -1408,8 +1352,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.HasIndex("OfferStatusId");
 
                     b.HasIndex("OpportunityId");
-
-                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("PropertyId");
 
@@ -1448,9 +1390,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Property<int>("OfferId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1460,8 +1399,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OfferId");
-
-                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UserId");
 
@@ -3015,10 +2952,6 @@ namespace REIstacks.Infrastructure.Migrations
 
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Contact", b =>
                 {
-                    b.HasOne("REIstacks.Domain.Entities.CRM.LeadStage", "LeadStage")
-                        .WithMany()
-                        .HasForeignKey("LeadStageId");
-
                     b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("Contacts")
                         .HasForeignKey("OrganizationId")
@@ -3029,8 +2962,6 @@ namespace REIstacks.Infrastructure.Migrations
                         .WithMany("Contacts")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("LeadStage");
 
                     b.Navigation("Organization");
 
@@ -3080,14 +3011,6 @@ namespace REIstacks.Infrastructure.Migrations
                         .WithMany("Leads")
                         .HasForeignKey("CampaignId");
 
-                    b.HasOne("REIstacks.Domain.Entities.CRM.Contact", null)
-                        .WithMany("Leads")
-                        .HasForeignKey("ContactId");
-
-                    b.HasOne("REIstacks.Domain.Entities.CRM.LeadStage", null)
-                        .WithMany("Leads")
-                        .HasForeignKey("LeadStageId");
-
                     b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
                         .WithMany("Leads")
                         .HasForeignKey("OrganizationId")
@@ -3095,17 +3018,6 @@ namespace REIstacks.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Campaign");
-
-                    b.Navigation("Organization");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.LeadStage", b =>
-                {
-                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", "Organization")
-                        .WithMany("LeadStages")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.Navigation("Organization");
                 });
@@ -3339,10 +3251,6 @@ namespace REIstacks.Infrastructure.Migrations
                         .WithMany("Offers")
                         .HasForeignKey("OpportunityId");
 
-                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", null)
-                        .WithMany("Offers")
-                        .HasForeignKey("OrganizationId");
-
                     b.HasOne("REIstacks.Domain.Entities.Properties.Property", "Property")
                         .WithMany("Offers")
                         .HasForeignKey("PropertyId")
@@ -3363,10 +3271,6 @@ namespace REIstacks.Infrastructure.Migrations
                         .HasForeignKey("OfferId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("REIstacks.Domain.Entities.Organizations.Organization", null)
-                        .WithMany("OfferDocuments")
-                        .HasForeignKey("OrganizationId");
 
                     b.HasOne("REIstacks.Domain.Entities.User.UserProfile", "User")
                         .WithMany()
@@ -3871,8 +3775,6 @@ namespace REIstacks.Infrastructure.Migrations
 
                     b.Navigation("EmailAddresses");
 
-                    b.Navigation("Leads");
-
                     b.Navigation("Opportunities");
 
                     b.Navigation("PhoneNumbers");
@@ -3890,11 +3792,6 @@ namespace REIstacks.Infrastructure.Migrations
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.ContactStatus", b =>
                 {
                     b.Navigation("Contacts");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.LeadStage", b =>
-                {
-                    b.Navigation("Leads");
                 });
 
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.List", b =>
@@ -3990,17 +3887,11 @@ namespace REIstacks.Infrastructure.Migrations
 
                     b.Navigation("LandingPages");
 
-                    b.Navigation("LeadStages");
-
                     b.Navigation("Leads");
 
                     b.Navigation("Lists");
 
                     b.Navigation("MarketingCampaigns");
-
-                    b.Navigation("OfferDocuments");
-
-                    b.Navigation("Offers");
 
                     b.Navigation("Opportunities");
 

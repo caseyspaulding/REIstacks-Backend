@@ -45,7 +45,6 @@ public class AppDbContext : DbContext
     public DbSet<FieldMappingTemplate> FieldMappingTemplates { get; set; }
     public DbSet<ImportJob> ImportJobs { get; set; } // Note: Changed from ImportJob to ImportJobs for consistency
     public DbSet<ImportError> ImportErrors { get; set; }
-    // CRM Entities
     public DbSet<Contact> Contacts { get; set; }
     public DbSet<Property> Properties { get; set; }
     public DbSet<Deal> Deals { get; set; }
@@ -80,6 +79,11 @@ public class AppDbContext : DbContext
     public DbSet<SkipTraceBreakdown> SkipTraceBreakdowns { get; set; }
     public DbSet<SkipTraceItem> SkipTraceItems { get; set; }
     public DbSet<PropertyImage> PropertyImages { get; set; }
+    public DbSet<Opportunity> Opportunities { get; set; }
+    public DbSet<OpportunityStage> OpportunityStages { get; set; }
+    public DbSet<OfferStatus> OfferStatuses { get; set; }
+    public DbSet<LeadStage> LeadStages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -113,9 +117,6 @@ public class AppDbContext : DbContext
         var vacantFilter = new PropertyFilterCriteria { IsVacant = true };
         var foreclosureFilter = new PropertyFilterCriteria { IsForeclosure = true };
         // Add more filters for each preset type...
-
-
-
 
         modelBuilder.Entity<PropertyFile>()
     .HasOne(pf => pf.Property)
@@ -665,6 +666,68 @@ public class AppDbContext : DbContext
       .WithMany(p => p.Images)
       .HasForeignKey(pi => pi.PropertyId)
       .OnDelete(DeleteBehavior.Cascade);
+
+
+        // Opportunity relationships
+        // Opportunity relationships
+        modelBuilder.Entity<Opportunity>()
+            .HasOne(o => o.Contact)
+            .WithMany(c => c.Opportunities) // Specify the collection property
+            .HasForeignKey(o => o.ContactId)
+            .IsRequired(false);
+
+        modelBuilder.Entity<Opportunity>()
+            .HasOne(o => o.Property)
+            .WithMany(p => p.Opportunities) // Specify the collection property
+            .HasForeignKey(o => o.PropertyId)
+            .IsRequired(false);
+
+        modelBuilder.Entity<Opportunity>()
+            .HasOne(o => o.Deal)
+            .WithMany(d => d.Opportunities) // Specify the collection property
+            .HasForeignKey(o => o.DealId)
+            .IsRequired(false);
+
+        modelBuilder.Entity<Opportunity>()
+            .HasOne(o => o.Stage)
+            .WithMany(s => s.Opportunities) // Specify the collection property
+            .HasForeignKey(o => o.StageId);
+
+        modelBuilder.Entity<Opportunity>()
+            .HasOne(o => o.Organization)
+            .WithMany(o => o.Opportunities) // Specify the collection property
+            .HasForeignKey(o => o.OrganizationId);
+
+        // Configure OpportunityStage relationships
+        modelBuilder.Entity<OpportunityStage>()
+            .HasOne(s => s.Organization)
+            .WithMany()
+            .HasForeignKey(s => s.OrganizationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Offer to Opportunity (many-to-one)
+        modelBuilder.Entity<Offer>()
+            .HasOne(o => o.Opportunity)
+            .WithMany(op => op.Offers)
+            .HasForeignKey(o => o.OpportunityId)
+        .IsRequired(false);
+
+
+
+        modelBuilder.Entity<Lead>()
+     .HasOne(l => l.LeadStage)
+     .WithMany(ls => ls.Leads)           // assume LeadStage has ICollection<Lead> Leads
+     .HasForeignKey(l => l.LeadStageId)
+     .OnDelete(DeleteBehavior.Restrict);
+
+        // Lead stage configuration
+        modelBuilder.Entity<LeadStage>()
+            .HasOne(ls => ls.Organization)
+            .WithMany(o => o.LeadStages)
+            .HasForeignKey(ls => ls.OrganizationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
 
     }
 }

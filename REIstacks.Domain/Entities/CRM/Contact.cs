@@ -89,18 +89,28 @@ public class Contact
 
     public bool ConsentEmailMarketing { get; set; }
 
+    public int? LeadOwnerId { get; set; }
+
     [ForeignKey("StatusId")]
     public virtual ContactStatus? Status { get; set; }
 
     [MaxLength(50)]
     public string? StatusId { get; set; }
-
+    public int? LeadStageId { get; set; }
 
     // Navigation properties
     [ForeignKey("OrganizationId")]
     public virtual Organization Organization { get; set; }
+    [ForeignKey("LeadStageId")]
+    public virtual LeadStage LeadStage { get; set; }
+
+    [MaxLength(50)]
+    public string LeadStatus { get; set; } // "Open", "Contacted", "Qualified", "Converted", etc.
+
+    public DateTime? LeadConvertedDate { get; set; }
 
     // Collection properties
+    public virtual ICollection<Opportunity> Opportunities { get; set; } = new List<Opportunity>();
     public virtual ICollection<ContactTag> ContactTags { get; set; } = new List<ContactTag>();
     public virtual ICollection<Property> Properties { get; set; } = new List<Property>();
     public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
@@ -108,4 +118,5 @@ public class Contact
     public virtual ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
     public virtual ICollection<ContactPhone> PhoneNumbers { get; set; } = new List<ContactPhone>();
     public virtual ICollection<ContactEmail> EmailAddresses { get; set; } = new List<ContactEmail>();
+    public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
 }

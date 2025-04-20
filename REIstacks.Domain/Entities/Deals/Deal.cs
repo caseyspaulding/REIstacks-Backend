@@ -89,6 +89,7 @@ public class Deal
     public virtual Contact BuyerContact { get; set; }
 
     // Collection properties
+    public virtual ICollection<Opportunity> Opportunities { get; set; } = new List<Opportunity>();
     public virtual ICollection<TaskItem> TaskItems { get; set; } = new List<TaskItem>();
     public virtual ICollection<DealDocument> Documents { get; set; } = new List<DealDocument>();
 }
