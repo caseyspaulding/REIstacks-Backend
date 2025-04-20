@@ -18,5 +18,5 @@ public class SkipTraceBreakdown
     public int Count { get; set; } // e.g. 1119, 765, …
 
     [ForeignKey(nameof(SkipTraceActivityId))]
-    public SkipTraceActivity Activity { get; set; }
+    public virtual SkipTraceActivity SkipTraceActivity { get; set; }
 }

@@ -1,14 +1,15 @@
-﻿using REIstacks.Domain.Entities.CRM;
-
-namespace REIstacks.Application.Interfaces.IServices;
+﻿namespace REIstacks.Application.Interfaces.IServices;
 public interface ISkipTraceService
 {
-    Task<(IEnumerable<SkipTraceActivity> Items, int TotalCount)>
-        GetActivitiesAsync(int page, int pageSize, string orgId);
+    // Start a new skip trace for a batch of contact IDs
+    Task<SkipTraceActivity> StartSkipTraceAsync(IEnumerable<int> contactIds, string organizationId);
 
-    Task<IEnumerable<SkipTraceBreakdown>>
-        GetBreakdownAsync(int activityId, string orgId);
+    // Get a list of all skip trace activities for the current org
+    Task<IEnumerable<SkipTraceActivity>> GetActivitiesAsync(string organizationId);
 
-    Task<int> CreateActivityAsync(SkipTraceActivity activity);
-    // … other methods (update status, etc.) as needed …
+    // Get a single activity (with breakdown & items)
+    Task<SkipTraceActivity?> GetActivityByIdAsync(int id, string organizationId);
+
+    // (optionally) Cancel or retry a failed activity
+    Task<bool> CancelActivityAsync(int id, string organizationId);
 }

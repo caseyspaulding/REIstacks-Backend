@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REIstacks.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using REIstacks.Infrastructure.Data;
 namespace REIstacks.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250420121153_AddSkipTrace32")]
+    partial class AddSkipTrace32
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -984,6 +987,45 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("prospect_list_presets");
                 });
 
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.SkipTraceActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("OrganizationId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ProcessedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RawResponse")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Saved")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("skip_trace_activities");
+                });
+
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.SkipTraceBreakdown", b =>
                 {
                     b.Property<int>("Id")
@@ -1008,43 +1050,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.HasIndex("SkipTraceActivityId");
 
                     b.ToTable("skip_trace_breakdowns");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.SkipTraceItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RawResponseJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SkipTraceActivityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SkipTraceActivityId");
-
-                    b.ToTable("skip_trace_items");
                 });
 
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Tag", b =>
@@ -2650,42 +2655,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.ToTable("profiles");
                 });
 
-            modelBuilder.Entity("SkipTraceActivity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("OrganizationId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("ProcessedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RawResponseJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Saved")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("skip_trace_activities");
-                });
-
             modelBuilder.Entity("ContactEmail", b =>
                 {
                     b.HasOne("REIstacks.Domain.Entities.CRM.Contact", "Contact")
@@ -2954,24 +2923,13 @@ namespace REIstacks.Infrastructure.Migrations
 
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.SkipTraceBreakdown", b =>
                 {
-                    b.HasOne("SkipTraceActivity", "SkipTraceActivity")
+                    b.HasOne("REIstacks.Domain.Entities.CRM.SkipTraceActivity", "SkipTraceActivity")
                         .WithMany("Breakdown")
                         .HasForeignKey("SkipTraceActivityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("SkipTraceActivity");
-                });
-
-            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.SkipTraceItem", b =>
-                {
-                    b.HasOne("SkipTraceActivity", "Activity")
-                        .WithMany("Items")
-                        .HasForeignKey("SkipTraceActivityId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
                 });
 
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Tag", b =>
@@ -3567,6 +3525,11 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("PhoneNumbers");
                 });
 
+            modelBuilder.Entity("REIstacks.Domain.Entities.CRM.SkipTraceActivity", b =>
+                {
+                    b.Navigation("Breakdown");
+                });
+
             modelBuilder.Entity("REIstacks.Domain.Entities.CRM.Tag", b =>
                 {
                     b.Navigation("ContactTags");
@@ -3714,13 +3677,6 @@ namespace REIstacks.Infrastructure.Migrations
                     b.Navigation("OwnedOrganizations");
 
                     b.Navigation("RefreshTokens");
-                });
-
-            modelBuilder.Entity("SkipTraceActivity", b =>
-                {
-                    b.Navigation("Breakdown");
-
-                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

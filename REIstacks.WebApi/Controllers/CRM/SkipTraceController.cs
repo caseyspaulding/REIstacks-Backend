@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using REIstacks.Application.Interfaces.IServices;
-using REIstacks.Domain.Entities.CRM;
+using System.Security.Claims;
 
 namespace REIstacks.Api.Controllers.CRM;
 
@@ -13,36 +13,48 @@ public class SkipTraceController : TenantController
     private readonly ISkipTraceService _svc;
     public SkipTraceController(ISkipTraceService svc) => _svc = svc;
 
-    // GET api/skiptrace?page=1&pageSize=10
-    [HttpGet]
-    public async Task<IActionResult> GetActivities(
-        [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-    {
-        var (items, total) = await _svc.GetActivitiesAsync(page, pageSize, OrgId);
-        return Ok(new { data = items, total, page, pageSize });
-    }
-
-    // GET api/skiptrace/{id}/breakdown
-    [HttpGet("{id:int}/breakdown")]
-    public async Task<IActionResult> GetBreakdown(int id)
-    {
-        try
-        {
-            var breakdown = await _svc.GetBreakdownAsync(id, OrgId);
-            return Ok(breakdown);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Activity not found" });
-        }
-    }
-
     // POST api/skiptrace
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] SkipTraceActivity dto)
+    public async Task<IActionResult> Start([FromBody] int[] contactIds)
     {
-        dto.OrganizationId = OrgId;
-        var id = await _svc.CreateActivityAsync(dto);
-        return CreatedAtAction(nameof(GetBreakdown), new { id }, dto);
+        var orgId = User.FindFirstValue("organization_id");
+        if (string.IsNullOrEmpty(orgId)) return Unauthorized();
+
+        var activity = await _svc.StartSkipTraceAsync(contactIds, orgId);
+        return CreatedAtAction(nameof(GetById), new { id = activity.Id }, activity);
+    }
+
+    // GET api/skiptrace
+    [HttpGet]
+    public async Task<IActionResult> List()
+    {
+        var orgId = User.FindFirstValue("organization_id");
+        if (string.IsNullOrEmpty(orgId)) return Unauthorized();
+
+        var list = await _svc.GetActivitiesAsync(orgId);
+        return Ok(list);
+    }
+
+    // GET api/skiptrace/{id}
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var orgId = User.FindFirstValue("organization_id");
+        if (string.IsNullOrEmpty(orgId)) return Unauthorized();
+
+        var activity = await _svc.GetActivityByIdAsync(id, orgId);
+        if (activity == null) return NotFound();
+        return Ok(activity);
+    }
+
+    // DELETE api/skiptrace/{id}
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Cancel(int id)
+    {
+        var orgId = User.FindFirstValue("organization_id");
+        if (string.IsNullOrEmpty(orgId)) return Unauthorized();
+
+        var ok = await _svc.CancelActivityAsync(id, orgId);
+        return ok ? NoContent() : NotFound();
     }
 }

@@ -83,7 +83,7 @@ public static class DependencyInjection
         services.AddScoped<IProspectListPresetService, ProspectListPresetService>();
         services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IListService, ListService>();
-
+        services.AddScoped<ISkipTraceService, SkipTraceService>();
         services.AddHttpClient();
         services.Scan(scan => scan
             .FromAssemblyOf<IDomainEventHandler<IDomainEvent>>()

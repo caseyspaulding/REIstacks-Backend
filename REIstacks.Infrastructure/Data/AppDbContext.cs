@@ -78,6 +78,7 @@ public class AppDbContext : DbContext
     public DbSet<DirectMailCampaign> DirectMailCampaigns { get; set; }
     public DbSet<SkipTraceActivity> SkipTraceActivities { get; set; }
     public DbSet<SkipTraceBreakdown> SkipTraceBreakdowns { get; set; }
+    public DbSet<SkipTraceItem> SkipTraceItems { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -646,11 +647,17 @@ public class AppDbContext : DbContext
         .HasForeignKey(pd => pd.OrganizationId)
         .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<SkipTraceBreakdown>()
+         .HasOne(b => b.SkipTraceActivity)
+         .WithMany(a => a.Breakdown)
+         .HasForeignKey(b => b.SkipTraceActivityId)
+         .OnDelete(DeleteBehavior.NoAction);
+
         modelBuilder.Entity<SkipTraceActivity>()
-       .HasMany(a => a.Breakdown)
-       .WithOne(b => b.Activity)
-       .HasForeignKey(b => b.SkipTraceActivityId)
-       .OnDelete(DeleteBehavior.NoAction);
+      .HasMany(a => a.Items)
+      .WithOne(i => i.Activity)
+      .HasForeignKey(i => i.SkipTraceActivityId)
+      .OnDelete(DeleteBehavior.NoAction);
 
     }
 }
