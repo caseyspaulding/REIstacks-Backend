@@ -12,36 +12,36 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <PackageReference Include="AWSSDK.SimpleEmailV2" Version="3.7.408.26" />
+	  <PackageReference Include="AWSSDK.SimpleEmailV2" Version="3.7.410.9" />
 	  <PackageReference Include="Azure.Communication.Identity" Version="1.3.1" />
-	  <PackageReference Include="Azure.Communication.PhoneNumbers" Version="1.0.0" />
+	  <PackageReference Include="Azure.Communication.PhoneNumbers" Version="1.3.0" />
 	  <PackageReference Include="Azure.Messaging.EventGrid" Version="4.30.0" />
 	  <PackageReference Include="CsvHelper" Version="33.0.1" />
 	  <PackageReference Include="Dapper" Version="2.1.66" />
-	  <PackageReference Include="FastEndpoints" Version="5.35.0" />
+	  <PackageReference Include="FastEndpoints" Version="6.0.0" />
 	  <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
 	  <PackageReference Include="jose-jwt" Version="5.1.1" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3">
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
-	  <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
-	  <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.7.0" />
-	  <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.7.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.8.0" />
+	  <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.8.0" />
 	  <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.0.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.0.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.0.0" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.1" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
   </ItemGroup>
 
 </Project>

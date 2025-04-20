@@ -11,9 +11,6 @@ using REIstacks.Domain.Entities.Tasks;
 using REIstacks.Domain.Entities.UploadLeads;
 using REIstacks.Domain.Entities.User;
 
-
-
-
 namespace REIstacks.Infrastructure.Data;
 
 public class AppDbContext : DbContext
@@ -57,10 +54,203 @@ public class AppDbContext : DbContext
     public DbSet<CampaignContact> CampaignContacts { get; set; }
     public DbSet<PropertyDocument> PropertyDocuments { get; set; }
     public DbSet<DealDocument> DealDocuments { get; set; }
+    public DbSet<PropertyActivity> PropertyActivities { get; set; }
+    public DbSet<PropertyInteractionCount> PropertyInteractionCounts { get; set; }
+    public DbSet<ContactPhone> ContactPhones { get; set; }
+    public DbSet<ContactEmail> ContactEmails { get; set; }
+    public DbSet<PropertyNote> PropertyNotes { get; set; }
+    public DbSet<PropertyCommunication> PropertyCommunications { get; set; }
+    public DbSet<PropertyTag> PropertyTags { get; set; }
+    public DbSet<List> Lists { get; set; }
+    public DbSet<Offer> Offers { get; set; }
+    public DbSet<PropertyList> PropertyLists { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<OfferDocument> OfferDocuments { get; set; }
+    public DbSet<Board> Boards { get; set; }
+    public DbSet<BoardPhase> BoardPhases { get; set; }
+    public DbSet<PropertyBoard> PropertyBoards { get; set; }
+    public DbSet<PropertyFile> PropertyFiles { get; set; }
+    public DbSet<PhoneStatus> PhoneStatuses { get; set; }
+    public DbSet<ContactStatus> ContactStatuses { get; set; }
+    public DbSet<ContactTag> ContactTags { get; set; }
+    public DbSet<PhoneTag> PhoneTags { get; set; }
+    public DbSet<ProspectListPreset> ProspectListPresets { get; set; }
+    public DbSet<DirectMailCampaign> DirectMailCampaigns { get; set; }
+    public DbSet<SkipTraceActivity> SkipTraceActivities { get; set; }
+    public DbSet<SkipTraceBreakdown> SkipTraceBreakdowns { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<DirectMailCampaign>()
+            .HasOne(c => c.Property)
+            .WithMany(p => p.DirectMailCampaigns)
+            .HasForeignKey(c => c.PropertyId)
+             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<ContactTag>()
+    .HasOne(ct => ct.Contact)
+    .WithMany(c => c.ContactTags)
+    .HasForeignKey(ct => ct.ContactId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<ContactTag>()
+            .HasOne(ct => ct.Tag)
+            .WithMany(t => t.ContactTags)
+            .HasForeignKey(ct => ct.TagId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PhoneTag>()
+    .HasOne(pt => pt.Tag)
+    .WithMany(t => t.PhoneTags)  // You'll need to add this navigation property to Tag class
+    .HasForeignKey(pt => pt.TagId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        // Create filter objects and serialize to JSON
+        var absenteeOwnerFilter = new PropertyFilterCriteria { IsAbsenteeOwner = true };
+        var vacantFilter = new PropertyFilterCriteria { IsVacant = true };
+        var foreclosureFilter = new PropertyFilterCriteria { IsForeclosure = true };
+        // Add more filters for each preset type...
+
+
+
+
+        modelBuilder.Entity<PropertyFile>()
+    .HasOne(pf => pf.Property)
+    .WithMany(p => p.Files)
+    .HasForeignKey(pf => pf.PropertyId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyFile>()
+            .HasOne(pf => pf.UploadedBy)
+            .WithMany()
+            .HasForeignKey(pf => pf.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Board>()
+    .HasOne(b => b.Organization)
+    .WithMany(o => o.Boards)
+    .HasForeignKey(b => b.OrganizationId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<BoardPhase>()
+            .HasOne(bp => bp.Board)
+            .WithMany(b => b.Phases)
+            .HasForeignKey(bp => bp.BoardId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PropertyBoard>()
+            .HasOne(pb => pb.Property)
+            .WithMany(p => p.PropertyBoards)
+            .HasForeignKey(pb => pb.PropertyId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyBoard>()
+            .HasOne(pb => pb.Board)
+            .WithMany(b => b.PropertyBoards)
+            .HasForeignKey(pb => pb.BoardId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyBoard>()
+            .HasOne(pb => pb.Phase)
+            .WithMany(bp => bp.PropertyBoards)
+            .HasForeignKey(pb => pb.PhaseId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .IsRequired(false);
+
+        modelBuilder.Entity<PropertyActivity>()
+    .HasOne(pa => pa.Property)
+    .WithMany(p => p.Activities)
+    .HasForeignKey(pa => pa.PropertyId)
+    .OnDelete(DeleteBehavior.NoAction); // Prevent cascade delete issue
+
+        modelBuilder.Entity<PropertyActivity>()
+            .HasOne(pa => pa.User)
+            .WithMany()
+            .HasForeignKey(pa => pa.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyActivity>()
+            .HasOne(pa => pa.TargetUser)
+            .WithMany()
+            .HasForeignKey(pa => pa.TargetUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .IsRequired(false); // Not all activities will have a target user
+
+        // Add an index for faster retrieval
+        modelBuilder.Entity<PropertyActivity>()
+            .HasIndex(pa => new { pa.PropertyId, pa.Timestamp });
+
+        modelBuilder.Entity<PropertyList>()
+    .HasOne(pl => pl.Property)
+    .WithMany(p => p.PropertyLists)
+    .HasForeignKey(pl => pl.PropertyId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyList>()
+            .HasOne(pl => pl.List)
+            .WithMany(l => l.PropertyLists)
+            .HasForeignKey(pl => pl.ListId);
+
+
+        modelBuilder.Entity<List>()
+    .HasOne(l => l.Organization)
+    .WithMany(o => o.Lists)
+    .HasForeignKey(l => l.OrganizationId);
+
+        modelBuilder.Entity<Tag>()
+            .HasOne(t => t.Organization)
+            .WithMany(o => o.Tags)
+            .HasForeignKey(t => t.OrganizationId);
+
+        modelBuilder.Entity<PropertyTag>()
+    .HasOne(pt => pt.Property)
+    .WithMany(p => p.PropertyTags)
+    .HasForeignKey(pt => pt.PropertyId)
+  .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyTag>()
+     .HasOne(pt => pt.Organization)
+     .WithMany(o => o.PropertyTags)
+     .HasForeignKey(pt => pt.OrganizationId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+
+        modelBuilder.Entity<OfferDocument>()
+    .HasOne(od => od.User)
+    .WithMany()
+    .HasForeignKey(od => od.UserId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyCommunication>()
+       .HasOne(pc => pc.Property)
+       .WithMany()
+       .HasForeignKey(pc => pc.PropertyId)
+       .OnDelete(DeleteBehavior.NoAction);
+
+        // You might also need to modify the User relationship
+        modelBuilder.Entity<PropertyCommunication>()
+            .HasOne(pc => pc.User)
+            .WithMany()
+            .HasForeignKey(pc => pc.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+        // Configure one-to-one relationship between Property and InteractionCounts
+        modelBuilder.Entity<Property>()
+            .HasOne(p => p.InteractionCounts)
+            .WithOne(i => i.Property)
+            .HasForeignKey<PropertyInteractionCount>(i => i.PropertyId);
+
+        // Configure one-to-many relationship between Contact and ContactPhones
+        modelBuilder.Entity<Contact>()
+            .HasMany(c => c.PhoneNumbers)
+            .WithOne(p => p.Contact)
+            .HasForeignKey(p => p.ContactId);
+
+        // Configure one-to-many relationship between Contact and ContactEmails
+        modelBuilder.Entity<Contact>()
+            .HasMany(c => c.EmailAddresses)
+            .WithOne(e => e.Contact)
+            .HasForeignKey(e => e.ContactId);
 
         // Configure relationship between Organization and Contacts
         modelBuilder.Entity<Contact>()
@@ -172,7 +362,7 @@ public class AppDbContext : DbContext
             .HasOne(cc => cc.Campaign)
             .WithMany(c => c.CampaignContacts)
             .HasForeignKey(cc => cc.CampaignId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<CampaignContact>()
             .HasOne(cc => cc.Contact)
@@ -185,7 +375,7 @@ public class AppDbContext : DbContext
             .HasOne(pd => pd.Property)
             .WithMany(p => p.Documents)
             .HasForeignKey(pd => pd.PropertyId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         // Configure relationship between DealDocument and Deal
         modelBuilder.Entity<DealDocument>()
@@ -212,20 +402,21 @@ public class AppDbContext : DbContext
      .HasOne(lp => lp.Organization)
      .WithMany(o => o.LandingPages) // Add this to your Organization class if not already
      .HasForeignKey(lp => lp.OrganizationId)
-      .OnDelete(DeleteBehavior.Restrict);
+     .OnDelete(DeleteBehavior.NoAction);
 
 
         modelBuilder.Entity<LandingPageComponent>()
     .HasOne(lpc => lpc.LandingPage)
     .WithMany(lp => lp.Components)  // If you have a ICollection<LandingPageComponent> in your LandingPages entity
     .HasForeignKey(lpc => lpc.LandingPageId)
-    .OnDelete(DeleteBehavior.Cascade);
+    .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<FieldMappingTemplate>()
             .HasOne(fmt => fmt.Organization)
             .WithMany(o => o.FieldMappingTemplates) // You'll need to add this to your Organization class
             .HasForeignKey(fmt => fmt.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
+
         // First definition (correct)
         modelBuilder.Entity<ImportError>()
             .HasOne(ie => ie.Organization)
@@ -244,6 +435,7 @@ public class AppDbContext : DbContext
     .WithMany(o => o.ImportJobs) // Add this property to Organization
     .HasForeignKey(ij => ij.OrganizationId)
     .OnDelete(DeleteBehavior.NoAction);
+
         // Configure unique slug per organization
         modelBuilder.Entity<LandingPages>()
             .HasIndex(p => new { p.OrganizationId, p.Slug })
@@ -271,6 +463,22 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<StripeSubscription>()
             .HasIndex(s => s.StripeSubscriptionId)
             .IsUnique();
+
+        modelBuilder.Entity<OfferDocument>()
+    .HasOne(od => od.Offer)
+    .WithMany(o => o.Documents)
+    .HasForeignKey(od => od.OfferId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Offer>()
+    .HasOne(o => o.Property)
+    .WithMany(p => p.Offers)
+    .HasForeignKey(o => o.PropertyId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Offer>()
+            .Property(o => o.OfferAmount)
+            .HasPrecision(18, 2); // Adjust precision and scale as needed
 
 
 
@@ -371,7 +579,8 @@ public class AppDbContext : DbContext
        .HasOne(o => o.Owner)
        .WithMany(p => p.OwnedOrganizations)
        .HasForeignKey(o => o.OwnerId)
-       .OnDelete(DeleteBehavior.Restrict); // ✅ Prevents accidental deletion of owner
+       .OnDelete(DeleteBehavior.Restrict);
+
         // Configure enum conversions
         modelBuilder.Entity<UserProfile>()
             .Property(p => p.Role)
@@ -384,5 +593,64 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<RolePermission>()
             .Property(rp => rp.Permission)
             .HasConversion<string>();
+
+        modelBuilder.Entity<Contact>()
+        .Property(c => c.StatusId)
+        .IsRequired(false);
+
+        // ContactPhone → Contact (required)
+        modelBuilder.Entity<ContactPhone>()
+            .HasOne(cp => cp.Contact)
+            .WithMany(c => c.PhoneNumbers)    // your Contact class should have ICollection<ContactPhone> PhoneNumbers
+            .HasForeignKey(cp => cp.ContactId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Contact>()
+    .HasOne(c => c.Status)              // each Contact → one ContactStatus
+    .WithMany(s => s.Contacts)          // ContactStatus → many Contacts (that property you showed)
+    .HasForeignKey(c => c.StatusId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+        // make StatusId on ContactPhone nullable
+        modelBuilder.Entity<ContactPhone>()
+            .Property(cp => cp.StatusId)
+            .IsRequired(false);
+
+        // hook up the optional FK → lookup
+        modelBuilder.Entity<ContactPhone>()
+            .HasOne(cp => cp.Status)               // each phone may have one status
+            .WithMany(ps => ps.PhoneNumbers)       // the PhoneStatus.PhoneNumbers collection
+            .HasForeignKey(cp => cp.StatusId)      // StatusId is the FK
+            .OnDelete(DeleteBehavior.Cascade);     // or Restrict/SetNull per your needs
+
+        // ContactPhone.StatusId is optional:
+        modelBuilder.Entity<ContactPhone>()
+            .Property(cp => cp.StatusId)
+            .IsRequired(false);
+
+        modelBuilder.Entity<PropertyList>()
+    .HasOne(pl => pl.Organization)
+    .WithMany(o => o.PropertyLists)
+    .HasForeignKey(pl => pl.OrganizationId)
+    .OnDelete(DeleteBehavior.NoAction);  // Or Restrict/NoAction per your needs
+
+        modelBuilder.Entity<PropertyNote>()
+    .HasOne(pn => pn.Organization)
+    .WithMany(o => o.PropertyNotes)
+    .HasForeignKey(pn => pn.OrganizationId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyDocument>()
+        .HasOne(pd => pd.Organization)
+        .WithMany(o => o.PropertyDocuments)
+        .HasForeignKey(pd => pd.OrganizationId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<SkipTraceActivity>()
+       .HasMany(a => a.Breakdown)
+       .WithOne(b => b.Activity)
+       .HasForeignKey(b => b.SkipTraceActivityId)
+       .OnDelete(DeleteBehavior.NoAction);
+
     }
 }

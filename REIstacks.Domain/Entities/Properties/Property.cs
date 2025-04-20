@@ -89,9 +89,17 @@ public class Property
 
     [ForeignKey("OwnerContactId")]
     public virtual Contact OwnerContact { get; set; }
-
     // Collection properties
+
+    public virtual ICollection<PropertyFile> Files { get; set; } = new List<PropertyFile>();
+    public virtual ICollection<PropertyActivity> Activities { get; set; } = new List<PropertyActivity>();
+    public virtual ICollection<PropertyBoard> PropertyBoards { get; set; } = new List<PropertyBoard>();
+    public virtual ICollection<Offer> Offers { get; set; }
+    public virtual ICollection<PropertyList> PropertyLists { get; set; }
+    public virtual ICollection<PropertyTag> PropertyTags { get; set; }
+    public virtual PropertyInteractionCount InteractionCounts { get; set; }
     public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
     public virtual ICollection<TaskItem> TaskItems { get; set; } = new List<TaskItem>();
     public virtual ICollection<PropertyDocument> Documents { get; set; } = new List<PropertyDocument>();
+    public virtual ICollection<DirectMailCampaign> DirectMailCampaigns { get; set; } = new List<DirectMailCampaign>();
 }

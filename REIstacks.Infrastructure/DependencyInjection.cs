@@ -19,6 +19,7 @@ using REIstacks.Infrastructure.Repositories.CRM;
 using REIstacks.Infrastructure.Repositories.LeadGeneration;
 using REIstacks.Infrastructure.Repositories.Marketing;
 using REIstacks.Infrastructure.Repositories.Organizations;
+using REIstacks.Infrastructure.Repositories.Properties;
 using REIstacks.Infrastructure.Repositories.Users;
 using REIstacks.Infrastructure.Services;
 using REIstacks.Infrastructure.Services.Authentication;
@@ -73,9 +74,16 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationRoleRepository, OrganizationRoleRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<ILeadsImportService, LeadsImportService>();
+        services.AddScoped<IPhoneStatusService, PhoneStatusService>();
+        services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IProspectListPresetService, ProspectListPresetService>();
+        services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddScoped<IListService, ListService>();
+
         services.AddHttpClient();
         services.Scan(scan => scan
             .FromAssemblyOf<IDomainEventHandler<IDomainEvent>>()

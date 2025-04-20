@@ -89,13 +89,23 @@ public class Contact
 
     public bool ConsentEmailMarketing { get; set; }
 
+    [ForeignKey("StatusId")]
+    public virtual ContactStatus? Status { get; set; }
+
+    [MaxLength(50)]
+    public string? StatusId { get; set; }
+
+
     // Navigation properties
     [ForeignKey("OrganizationId")]
     public virtual Organization Organization { get; set; }
 
     // Collection properties
+    public virtual ICollection<ContactTag> ContactTags { get; set; } = new List<ContactTag>();
     public virtual ICollection<Property> Properties { get; set; } = new List<Property>();
     public virtual ICollection<Deal> Deals { get; set; } = new List<Deal>();
     public virtual ICollection<Communication> Communications { get; set; } = new List<Communication>();
     public virtual ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+    public virtual ICollection<ContactPhone> PhoneNumbers { get; set; } = new List<ContactPhone>();
+    public virtual ICollection<ContactEmail> EmailAddresses { get; set; } = new List<ContactEmail>();
 }

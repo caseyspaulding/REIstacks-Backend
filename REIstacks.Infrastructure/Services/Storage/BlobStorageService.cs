@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
 using REIstacks.Application.Interfaces.IServices;
 
@@ -26,7 +27,10 @@ public class BlobStorageService : IStorageService
         var uniqueFileName = $"{organizationId}/{Guid.NewGuid()}-{fileName}";
         var blobClient = containerClient.GetBlobClient(uniqueFileName);
 
-        await blobClient.UploadAsync(fileStream, overwrite: true);
+        // Determine content type based on file extension
+        string contentType = GetContentTypeFromFileName(fileName);
+
+        await blobClient.UploadAsync(fileStream, new BlobHttpHeaders { ContentType = contentType });
         return blobClient.Uri.ToString();
     }
 
@@ -56,4 +60,21 @@ public class BlobStorageService : IStorageService
         return downloadInfo.Value.Content;
     }
 
+    private string GetContentTypeFromFileName(string fileName)
+    {
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        return extension switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".pdf" => "application/pdf",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xls" => "application/vnd.ms-excel",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".csv" => "text/csv",
+            ".txt" => "text/plain",
+            _ => "application/octet-stream"  // Default content type
+        };
+    }
 }
