@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.OpenApi.Models;
-
 using REIstacks.Infrastructure;
 using REIStacks.Api.Middleware;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add Infrastructure layer (repositories, services, etc.)
@@ -46,9 +46,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "REIstacks API", Version = "v1" });
-
-    // Add this part to handle file uploads
     c.OperationFilter<FileUploadOperationFilter>();
+
+    // Optional: Add XML comments if you have them
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath);
 });
 builder.Services.AddOpenApi();
 

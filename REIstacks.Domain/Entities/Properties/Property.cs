@@ -79,6 +79,11 @@ public class Property
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }
 
+    [Column(TypeName = "decimal(9,6)")]
+    public decimal? Latitude { get; set; }
+
+    [Column(TypeName = "decimal(9,6)")]
+    public decimal? Longitude { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -95,6 +100,8 @@ public class Property
     public virtual ICollection<PropertyActivity> Activities { get; set; } = new List<PropertyActivity>();
     public virtual ICollection<PropertyBoard> PropertyBoards { get; set; } = new List<PropertyBoard>();
     public virtual ICollection<Offer> Offers { get; set; }
+    public virtual ICollection<PropertyImage> Images { get; set; }
+    = new List<PropertyImage>();
     public virtual ICollection<PropertyList> PropertyLists { get; set; }
     public virtual ICollection<PropertyTag> PropertyTags { get; set; }
     public virtual PropertyInteractionCount InteractionCounts { get; set; }

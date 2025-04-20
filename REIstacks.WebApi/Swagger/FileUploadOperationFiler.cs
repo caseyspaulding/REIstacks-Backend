@@ -1,42 +1,95 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 
 public class FileUploadOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        // Check if any parameter is of type IFormFile.
-        var fileParameters = context.ApiDescription.ParameterDescriptions
-            .Where(p => p.Type == typeof(IFormFile));
+        // Only apply to operations with multipart/form-data content type
+        var consumes = context.MethodInfo.GetCustomAttribute<Microsoft.AspNetCore.Mvc.ConsumesAttribute>();
+        if (consumes == null || !consumes.ContentTypes.Contains("multipart/form-data"))
+            return;
 
-        if (fileParameters.Any())
+        // Find parameters with IFormFile or FromForm attribute
+        var fileParameters = context.MethodInfo.GetParameters()
+            .Where(p => p.ParameterType == typeof(IFormFile) ||
+                   p.GetCustomAttribute<Microsoft.AspNetCore.Mvc.FromFormAttribute>() != null)
+            .ToList();
+
+        if (!fileParameters.Any())
+            return;
+
+        // Remove existing parameters that will be handled in form
+        foreach (var parameter in fileParameters)
         {
-            // Remove any existing parameters that are of type file if present.
-            operation.Parameters.Clear();
+            var existingParam = operation.Parameters
+                .FirstOrDefault(p => p.Name == parameter.Name);
 
-            // Define a request body with multipart/form-data.
-            operation.RequestBody = new OpenApiRequestBody
+            if (existingParam != null)
+                operation.Parameters.Remove(existingParam);
+        }
+
+        // Create schema
+        var schema = new OpenApiSchema
+        {
+            Type = "object",
+            Properties = new Dictionary<string, OpenApiSchema>(),
+            Required = new HashSet<string>()
+        };
+
+        // Process parameters
+        foreach (var parameter in fileParameters)
+        {
+            if (parameter.ParameterType == typeof(IFormFile))
             {
-                Content = {
-                    ["multipart/form-data"] = new OpenApiMediaType
+                // File parameter
+                schema.Properties[parameter.Name] = new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary"
+                };
+
+                if (!parameter.IsOptional)
+                    schema.Required.Add(parameter.Name);
+            }
+            else if (parameter.ParameterType.IsClass && parameter.ParameterType != typeof(string))
+            {
+                // Process complex type properties
+                foreach (var prop in parameter.ParameterType.GetProperties())
+                {
+                    if (prop.PropertyType == typeof(IFormFile))
                     {
-                        Schema = new OpenApiSchema
+                        // File property
+                        schema.Properties[prop.Name] = new OpenApiSchema
                         {
-                            Type = "object",
-                            Properties =
-                            {
-                                // "file" should match the parameter name.
-                                ["file"] = new OpenApiSchema
-                                {
-                                    Type = "string",
-                                    Format = "binary"
-                                }
-                            },
-                            Required = new HashSet<string> { "file" }
-                        }
+                            Type = "string",
+                            Format = "binary"
+                        };
+                    }
+                    else
+                    {
+                        // Regular property
+                        schema.Properties[prop.Name] = new OpenApiSchema
+                        {
+                            Type = "string"
+                        };
                     }
                 }
-            };
+            }
         }
+
+        // Set request body
+        operation.RequestBody = new OpenApiRequestBody
+        {
+            Content = new Dictionary<string, OpenApiMediaType>
+            {
+                ["multipart/form-data"] = new OpenApiMediaType
+                {
+                    Schema = schema
+                }
+            },
+            Required = true
+        };
     }
 }

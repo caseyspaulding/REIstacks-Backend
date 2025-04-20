@@ -24,7 +24,9 @@ namespace REIstacks.Api.Controllers.CRM
         /// <summary>
         /// 1) Upload a CSV/XLSX and return its column headers so the UI can prompt the user to map them.
         /// </summary>
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<FileUploadResult>> Upload([FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -44,7 +46,9 @@ namespace REIstacks.Api.Controllers.CRM
         /// <summary>
         /// 2) User submits the same file + their column→field mapping; we parse & kick off skip‑trace by raw addresses.
         /// </summary>
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost("run")]
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<SkipTraceActivity>> RunMapped(
             [FromForm] IFormFile file,
             [FromForm] FieldMappingRequest mapping)

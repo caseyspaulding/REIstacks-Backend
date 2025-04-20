@@ -79,6 +79,7 @@ public class AppDbContext : DbContext
     public DbSet<SkipTraceActivity> SkipTraceActivities { get; set; }
     public DbSet<SkipTraceBreakdown> SkipTraceBreakdowns { get; set; }
     public DbSet<SkipTraceItem> SkipTraceItems { get; set; }
+    public DbSet<PropertyImage> PropertyImages { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -658,6 +659,12 @@ public class AppDbContext : DbContext
       .WithOne(i => i.Activity)
       .HasForeignKey(i => i.SkipTraceActivityId)
       .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PropertyImage>()
+      .HasOne(pi => pi.Property)
+      .WithMany(p => p.Images)
+      .HasForeignKey(pi => pi.PropertyId)
+      .OnDelete(DeleteBehavior.Cascade);
 
     }
 }
