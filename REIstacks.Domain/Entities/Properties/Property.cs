@@ -1,15 +1,24 @@
 ﻿
+using REIstacks.Domain.Common;
 using REIstacks.Domain.Entities.CRM;
 using REIstacks.Domain.Entities.Deals;
 using REIstacks.Domain.Entities.Organizations;
 using REIstacks.Domain.Entities.Tasks;
+using REIstacks.Domain.Events;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace REIstacks.Domain.Entities.Properties;
 [Table("properties")]
-public class Property
+public class Property : Entity
 {
+    public void ChangeStatus(string newStatus)
+    {
+        var old = PropertyStatus;
+        PropertyStatus = newStatus;
+        RaiseDomainEvent(new PropertyStatusChangedEvent(Id, old, newStatus));
+    }
+
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }

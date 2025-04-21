@@ -47,7 +47,26 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "REIstacks API", Version = "v1" });
     c.OperationFilter<FileUploadOperationFilter>();
-
+    c.AddSecurityDefinition("cookieAuth", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Cookie,
+        Name = "access_token",
+        Scheme = "cookieAuth",
+        Description = "Put your JWT access_token here"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "cookieAuth"
+            }
+        }
+      ] = Array.Empty<string>()
+    });
     // Optional: Add XML comments if you have them
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);

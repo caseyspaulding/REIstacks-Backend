@@ -3,14 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using REIstacks.Application.Common;
-using REIstacks.Application.Common.EventHandlers;
 using REIstacks.Application.Interfaces;
+using REIstacks.Application.Interfaces.IEventHandlers;
 using REIstacks.Application.Interfaces.IRepositories;
 using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Application.Services.Interfaces;
 using REIstacks.Application.Services.Users;
-using REIstacks.Domain.Common;
 using REIstacks.Infrastructure.Data;
 using REIstacks.Infrastructure.EventDispatching;
 using REIstacks.Infrastructure.Repositories;
@@ -74,7 +73,6 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationRoleRepository, OrganizationRoleRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<ILeadsImportService, LeadsImportService>();
@@ -85,17 +83,24 @@ public static class DependencyInjection
         services.AddScoped<IListService, ListService>();
         services.AddHttpClient<ISkipTraceService, SkipTraceService>();
         services.AddScoped<IFileProcessingService, FileProcessingService>();
-
+        services.AddScoped<IOpportunityService, OpportunityService>();
+        services.AddScoped<IDealService, DealService>();
+        services.AddScoped<IContactActivityService, ContactActivityService>();
+        services.AddScoped<IProductivityService, ProductivityService>();
         services.AddHttpClient();
-        services.Scan(scan => scan
-            .FromAssemblyOf<IDomainEventHandler<IDomainEvent>>()
-            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
-
         services.AddTransient<ISmsService, AzureSmsService>();
-
         services.AddScoped<ICsvImportService, CsvImportService>();
+        services.AddScoped<IContactStatusService, ContactStatusService>();
+
+
+        services.Scan(scan => scan
+          .FromAssemblyOf<DomainEventDispatcher>()              // REIstacks.Infrastructure.dll
+          .AddClasses(classes => classes
+          .AssignableTo(typeof(IDomainEventHandler<>)))
+          .AsImplementedInterfaces()
+          .WithScopedLifetime());
+
+
         services.AddScoped<EventGridPublisher>(sp =>
         {
             var topicEndpoint = configuration["EventGrid:TopicEndpoint"];

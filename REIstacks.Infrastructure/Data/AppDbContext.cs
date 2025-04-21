@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using REIstacks.Application.Common;
+using REIstacks.Domain.Common;
 using REIstacks.Domain.Entities.Auth;
 using REIstacks.Domain.Entities.Billing;
 using REIstacks.Domain.Entities.Blog;
@@ -15,10 +17,72 @@ namespace REIstacks.Infrastructure.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-        : base(options)
+    private readonly IDomainEventDispatcher _dispatcher;
+
+    public AppDbContext(
+        DbContextOptions<AppDbContext> options,
+        IDomainEventDispatcher dispatcher)
+      : base(options)
     {
+        _dispatcher = dispatcher;
     }
+
+    public override async Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        // 1) Persist your changes
+        var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+        // 2) Grab all entities that have domain events
+        var domainEntries = ChangeTracker
+            .Entries<Entity>()
+            .Where(e => e.Entity.GetDomainEvents().Any())
+            .ToList();
+
+        // 3) Collect & clear
+        var events = domainEntries
+            .SelectMany(e => e.Entity.GetDomainEvents())
+            .ToList();
+        domainEntries.ForEach(e => e.Entity.ClearDomainEvents());
+
+        // 4) Dispatch each one
+        foreach (var @event in events)
+        {
+            await _dispatcher.DispatchAsync(@event, cancellationToken);
+        }
+
+        return result;
+    }
+
+    public override int SaveChanges()
+    {
+        // 1) Persist
+        var result = base.SaveChanges();
+
+        // 2) Grab all entities that have domain events
+        var domainEntries = ChangeTracker
+            .Entries<Entity>()
+            .Where(e => e.Entity.GetDomainEvents().Any())
+            .ToList();
+
+        // 3) Collect & clear
+        var events = domainEntries
+            .SelectMany(e => e.Entity.GetDomainEvents())
+            .ToList();
+        domainEntries.ForEach(e => e.Entity.ClearDomainEvents());
+
+        // 4) Dispatch synchronously
+        foreach (var @event in events)
+        {
+            // block on DispatchAsync
+            _dispatcher.DispatchAsync(@event).GetAwaiter().GetResult();
+        }
+
+        return result;
+    }
+
+
     public DbSet<BlogPost> BlogPosts { get; set; }
     // Define your DbSet properties here for your entities
     public DbSet<Organization> Organizations { get; set; }
@@ -83,7 +147,7 @@ public class AppDbContext : DbContext
     public DbSet<OpportunityStage> OpportunityStages { get; set; }
     public DbSet<OfferStatus> OfferStatuses { get; set; }
     public DbSet<LeadStage> LeadStages { get; set; }
-
+    public DbSet<ContactActivity> ContactActivities { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -282,6 +346,16 @@ public class AppDbContext : DbContext
             .WithMany(o => o.Deals)
             .HasForeignKey(d => d.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Deal>()
+  .Property(d => d.DealStatus)
+  .HasConversion<string>()    // stores enum names in the database
+  .HasMaxLength(50);
+
+        modelBuilder.Entity<Deal>()
+  .Property(d => d.DealType)
+  .HasConversion<string>()     // store as varchar
+  .HasMaxLength(50);
 
         // Configure relationship between Deal and Property
         modelBuilder.Entity<Deal>()
@@ -674,19 +748,22 @@ public class AppDbContext : DbContext
             .HasOne(o => o.Contact)
             .WithMany(c => c.Opportunities) // Specify the collection property
             .HasForeignKey(o => o.ContactId)
-            .IsRequired(false);
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Opportunity>()
             .HasOne(o => o.Property)
             .WithMany(p => p.Opportunities) // Specify the collection property
             .HasForeignKey(o => o.PropertyId)
-            .IsRequired(false);
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Opportunity>()
             .HasOne(o => o.Deal)
             .WithMany(d => d.Opportunities) // Specify the collection property
             .HasForeignKey(o => o.DealId)
-            .IsRequired(false);
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Opportunity>()
             .HasOne(o => o.Stage)
@@ -696,14 +773,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Opportunity>()
             .HasOne(o => o.Organization)
             .WithMany(o => o.Opportunities) // Specify the collection property
-            .HasForeignKey(o => o.OrganizationId);
+            .HasForeignKey(o => o.OrganizationId)
+            .OnDelete(DeleteBehavior.NoAction);
 
-        // Configure OpportunityStage relationships
-        modelBuilder.Entity<OpportunityStage>()
-            .HasOne(s => s.Organization)
-            .WithMany()
-            .HasForeignKey(s => s.OrganizationId)
-            .OnDelete(DeleteBehavior.Restrict);
+
 
         // Offer to Opportunity (many-to-one)
         modelBuilder.Entity<Offer>()
@@ -718,16 +791,52 @@ public class AppDbContext : DbContext
      .HasOne(l => l.LeadStage)
      .WithMany(ls => ls.Leads)           // assume LeadStage has ICollection<Lead> Leads
      .HasForeignKey(l => l.LeadStageId)
-     .OnDelete(DeleteBehavior.Restrict);
+     .OnDelete(DeleteBehavior.NoAction);
 
-        // Lead stage configuration
-        modelBuilder.Entity<LeadStage>()
-            .HasOne(ls => ls.Organization)
-            .WithMany(o => o.LeadStages)
-            .HasForeignKey(ls => ls.OrganizationId)
-            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Lead>()
+          .HasOne(l => l.AssignedToProfile)
+          .WithMany(u => u.AssignedLeads)
+          .HasForeignKey(l => l.AssignedToProfileId)
+          .OnDelete(DeleteBehavior.NoAction);    // <— here
 
+        modelBuilder.Entity<Opportunity>()
+          .HasOne(o => o.Owner)
+          .WithMany(u => u.Opportunities)
+          .HasForeignKey(o => o.OwnerProfileId)
+          .OnDelete(DeleteBehavior.NoAction);    // <— and here
 
+        // ContactActivity → Contact
+        modelBuilder.Entity<ContactActivity>()
+          .HasOne(a => a.Contact)
+          .WithMany(c => c.ContactActivities)
+          .HasForeignKey(a => a.ContactId)
+          .OnDelete(DeleteBehavior.NoAction);
+
+        // ContactActivity → UserProfile (CreatedBy)
+        modelBuilder.Entity<ContactActivity>()
+          .HasOne(a => a.CreatedByProfile)
+          .WithMany(u => u.ContactActivities)
+          .HasForeignKey(a => a.CreatedByProfileId)
+          .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<ContactActivity>()
+    .HasOne(a => a.CreatedByProfile)
+    .WithMany(u => u.ContactActivities)    // add this collection to UserProfile
+    .HasForeignKey(a => a.CreatedByProfileId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Offer>()
+    .HasOne(o => o.Organization)
+    .WithMany(org => org.Offers)
+    .HasForeignKey(o => o.OrganizationId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Offer>()
+            .HasOne(o => o.Opportunity)
+            .WithMany(op => op.Offers)
+            .HasForeignKey(o => o.OpportunityId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.NoAction);
 
     }
 }

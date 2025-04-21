@@ -1,4 +1,5 @@
 ﻿using REIstacks.Domain.Entities.Auth;
+using REIstacks.Domain.Entities.CRM;
 using REIstacks.Domain.Entities.Organizations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -52,4 +53,14 @@ public class UserProfile
     public virtual OrganizationRole OrganizationRole { get; set; }
     public virtual ICollection<Invitation> InvitationsSent { get; set; }
     public virtual ICollection<ActivityLog> ActivityLogs { get; set; }
+
+    public virtual ICollection<Lead> AssignedLeads { get; set; }
+    = new List<Lead>();
+
+    public virtual ICollection<Opportunity> Opportunities { get; set; }
+       = new List<Opportunity>();
+
+    public virtual ICollection<ContactActivity> ContactActivities { get; set; }
+   = new List<ContactActivity>();
+
 }

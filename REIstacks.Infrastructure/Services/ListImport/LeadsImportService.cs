@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using REIstacks.Application.Contracts.Requests; // Contains FinalizeImportRequest DTO.
 using REIstacks.Application.Contracts.Responses;
 using REIstacks.Application.Interfaces;
@@ -75,7 +76,26 @@ namespace REIstacks.Infrastructure.Services.ListImport
             var preview = await _csvImportService.GetPreviewAsync(fileStream, sampleRows);
             return preview;
         }
+        public async Task<bool> AssignLeadAsync(int leadId, string profileId, string organizationId)
+        {
+            var lead = await _db.Leads
+                .FirstOrDefaultAsync(l => l.Id == leadId && l.OrganizationId == organizationId);
+            if (lead == null) return false;
 
+            // Convert profileId to Guid for comparison
+            if (!Guid.TryParse(profileId, out var profileGuid))
+                throw new ArgumentException("Invalid profileId format");
+
+            // Verify the target user exists and belongs to the organization
+            var user = await _db.UserProfiles
+                .FirstOrDefaultAsync(u => u.Id == profileGuid && u.OrganizationId == organizationId);
+            if (user == null) throw new ArgumentException("Invalid user");
+
+            // Fix: Assign the Guid value to the nullable Guid property
+            lead.AssignedToProfileId = profileGuid;
+            await _db.SaveChangesAsync();
+            return true;
+        }
         /// <summary>
         /// Finalizes the CSV import by processing the file, mapping the fields, and updating the job record.
         /// </summary>

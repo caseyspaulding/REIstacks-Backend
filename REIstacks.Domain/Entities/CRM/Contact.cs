@@ -119,4 +119,6 @@ public class Contact
     public virtual ICollection<ContactPhone> PhoneNumbers { get; set; } = new List<ContactPhone>();
     public virtual ICollection<ContactEmail> EmailAddresses { get; set; } = new List<ContactEmail>();
     public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
+    public virtual ICollection<ContactActivity> ContactActivities { get; set; }
+   = new List<ContactActivity>();
 }

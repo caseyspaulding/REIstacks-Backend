@@ -9,6 +9,8 @@
   <ItemGroup>
     <Folder Include="Authentication\" />
     <Folder Include="Authorization\" />
+    <Folder Include="Common\" />
+    <Folder Include="EventHandlers\" />
     <Folder Include="Services\Blog\" />
   </ItemGroup>
 

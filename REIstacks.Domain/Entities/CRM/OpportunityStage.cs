@@ -1,5 +1,4 @@
-﻿using REIstacks.Domain.Entities.Organizations;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace REIstacks.Domain.Entities.CRM;
@@ -10,8 +9,7 @@ public class OpportunityStage
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
-    public string OrganizationId { get; set; }
+
 
     [Required]
     [MaxLength(50)]
@@ -23,9 +21,6 @@ public class OpportunityStage
     // For the UI progress indicator
     public bool IsCompleted { get; set; }
 
-    // Navigation property
-    [ForeignKey("OrganizationId")]
-    public virtual Organization Organization { get; set; }
 
     public virtual ICollection<Opportunity> Opportunities { get; set; } = new List<Opportunity>();
 }

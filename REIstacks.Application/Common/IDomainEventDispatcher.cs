@@ -1,4 +1,4 @@
-﻿using REIstacks.Domain.Common;
+﻿using REIstacks.Domain.Events;
 
 namespace REIstacks.Application.Common;
 public interface IDomainEventDispatcher

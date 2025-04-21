@@ -1,4 +1,6 @@
-﻿namespace REIstacks.Domain.Common;
+﻿using REIstacks.Domain.Events;
+
+namespace REIstacks.Domain.Common;
 
 public abstract class Entity
 {

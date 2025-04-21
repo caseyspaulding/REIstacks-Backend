@@ -1,17 +1,16 @@
-﻿using REIstacks.Application.Common;
-using REIstacks.Application.Interfaces.IRepositories;
+﻿using REIstacks.Application.Interfaces.IRepositories;
 using REIstacks.Application.Repositories.Interfaces;
-using REIstacks.Domain.Common;
 using REIstacks.Infrastructure.Data;
 
 namespace REIstacks.Infrastructure.Repositories
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly AppDbContext _context;
-        private readonly IDomainEventDispatcher _eventDispatcher;
+
         public IContactRepository Contacts { get; }
         public IUserProfileRepository UserProfiles { get; }
+        public IOrganizationRoleRepository OrganizationRoles { get; set; }
         public IOrganizationRepository Organizations { get; }
         public ILeadRepository Leads { get; }
         public IInvitationRepository Invitations { get; }
@@ -20,68 +19,43 @@ namespace REIstacks.Infrastructure.Repositories
         public IExternalAuthRepository ExternalAuths { get; }
         public IDomainVerificationRepository DomainVerifications { get; }
         public IStripeSubscriptionRepository StripeSubscriptions { get; }
-        public IOrganizationRoleRepository organizationRoleRepository { get; }
 
-        // Add event dispatcher to constructor
+
         public UnitOfWork(
             AppDbContext context,
+            IContactRepository contacts,
             IUserProfileRepository userProfiles,
             IOrganizationRepository organizations,
             ILeadRepository leads,
-            IContactRepository contacts,
             IInvitationRepository invitations,
             IActivityLogRepository activityLogs,
             IRefreshTokenRepository refreshTokens,
             IExternalAuthRepository externalAuths,
             IDomainVerificationRepository domainVerifications,
             IStripeSubscriptionRepository stripeSubscriptions,
-            IOrganizationRoleRepository organizationRoleRepository,
-            IDomainEventDispatcher eventDispatcher)
+            IOrganizationRoleRepository organizationRoles)
         {
             _context = context;
-            _eventDispatcher = eventDispatcher;
+            Contacts = contacts;
             UserProfiles = userProfiles;
             Organizations = organizations;
             Leads = leads;
-            Contacts = contacts;
             Invitations = invitations;
             ActivityLogs = activityLogs;
             RefreshTokens = refreshTokens;
             ExternalAuths = externalAuths;
             DomainVerifications = domainVerifications;
             StripeSubscriptions = stripeSubscriptions;
-            this.organizationRoleRepository = organizationRoleRepository;
+            OrganizationRoles = organizationRoles;
         }
 
-        public async Task<int> CompleteAsync()
-        {
-            // Find all entities with domain events
-            var entitiesWithEvents = _context.ChangeTracker.Entries<Entity>()
-                .Select(e => e.Entity)
-                .Where(e => e.GetDomainEvents().Any())
-                .ToArray();
-
-            // Save changes first
-            var result = await _context.SaveChangesAsync();
-
-            // Then dispatch events
-            foreach (var entity in entitiesWithEvents)
-            {
-                var events = entity.GetDomainEvents();
-                entity.ClearDomainEvents();
-
-                foreach (var domainEvent in events)
-                {
-                    await _eventDispatcher.DispatchAsync(domainEvent);
-                }
-            }
-
-            return result;
-        }
+        /// <summary>
+        /// Persist everything and (via the DbContext override) dispatch any raised domain events.
+        /// </summary>
+        public Task<int> CompleteAsync()
+            => _context.SaveChangesAsync();
 
         public void Dispose()
-        {
-            _context.Dispose();
-        }
+            => _context.Dispose();
     }
 }

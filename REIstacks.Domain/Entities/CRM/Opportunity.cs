@@ -1,6 +1,7 @@
 ﻿using REIstacks.Domain.Entities.Deals;
 using REIstacks.Domain.Entities.Organizations;
 using REIstacks.Domain.Entities.Properties;
+using REIstacks.Domain.Entities.User;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -30,7 +31,8 @@ public class Opportunity
 
     public DateTime? CloseDate { get; set; }
 
-    public int? OwnerId { get; set; } // User/employee ID
+    // replace your old OwnerId (int?) with this:
+    public Guid? OwnerProfileId { get; set; }
 
     // Foreign keys to related entities
     public int? PropertyId { get; set; }
@@ -43,6 +45,8 @@ public class Opportunity
     // Navigation properties
     [ForeignKey("OrganizationId")]
     public virtual Organization Organization { get; set; }
+    [ForeignKey(nameof(OwnerProfileId))]
+    public virtual UserProfile? Owner { get; set; }
 
     public virtual ICollection<Offer> Offers { get; set; } = new List<Offer>();
 

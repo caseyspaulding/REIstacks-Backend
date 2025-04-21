@@ -11,6 +11,21 @@ public class SkipTraceActivity
     [Required, MaxLength(450)]
     public string OrganizationId { get; set; }
 
+    // Add CreatedAt field for proper timestamp tracking
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime? CompletedAt { get; set; }
+
+    [Required]
+    public SkipTraceStatus Status { get; set; } = SkipTraceStatus.Pending;
+
+    // Add count tracking fields
+    public int Total { get; set; } // Total records to process
+    public int Matched { get; set; } // Successfully matched
+    public int Failed { get; set; } // Failed to match
+    public int Pending { get; set; } // Still waiting to be processed
+
+    // Existing fields
     public int ProcessedCount { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
@@ -19,10 +34,7 @@ public class SkipTraceActivity
     [Column(TypeName = "decimal(18,2)")]
     public decimal Saved { get; set; }
 
-    public DateTime CompletedAt { get; set; }
-
-    [Required]
-    public SkipTraceStatus Status { get; set; } = SkipTraceStatus.Pending;
+    public int TotalRowCount { get; set; }
 
     public string? RawResponseJson { get; set; }
 
@@ -31,4 +43,5 @@ public class SkipTraceActivity
 
     public virtual ICollection<SkipTraceItem> Items { get; set; }
         = new List<SkipTraceItem>();
+    public string? ErrorMessage { get; set; } = string.Empty;
 }

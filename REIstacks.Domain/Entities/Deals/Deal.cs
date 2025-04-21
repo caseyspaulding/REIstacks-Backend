@@ -28,10 +28,12 @@ public class Deal
     public string DealName { get; set; }
 
     [MaxLength(50)]
-    public string DealType { get; set; } // Wholesale, Flip, Buy and Hold
+    public DealType DealType { get; set; } // Wholesale, Flip, Buy and Hold
 
     [MaxLength(50)]
-    public string DealStatus { get; set; } // Lead, Negotiating, Under Contract, Closed, Dead
+
+    [Required]
+    public DealStatus DealStatus { get; set; }
 
     [MaxLength(50)]
     public string? DealStage { get; set; } // More detailed status tracking
@@ -74,6 +76,8 @@ public class Deal
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+
 
     // Navigation properties
     [ForeignKey("OrganizationId")]

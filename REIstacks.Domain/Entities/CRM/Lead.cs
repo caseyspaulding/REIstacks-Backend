@@ -1,5 +1,6 @@
 ﻿using REIstacks.Domain.Entities.Marketing;
 using REIstacks.Domain.Entities.Organizations;
+using REIstacks.Domain.Entities.User;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
@@ -113,7 +114,8 @@ namespace REIstacks.Domain.Entities.CRM
 
         public string? LeadSource { get; set; }
 
-        public string? AssignedTo { get; set; }
+        [MaxLength(450)]
+        public Guid? AssignedToProfileId { get; set; }
 
         public DateTime? LastContacted { get; set; }
 
@@ -214,6 +216,8 @@ namespace REIstacks.Domain.Entities.CRM
         {
             Timeline = JsonSerializer.Serialize(timeline);
         }
+        [ForeignKey(nameof(AssignedToProfileId))]
+        public virtual UserProfile? AssignedToProfile { get; set; }
 
         public string[] GetTimeline()
         {

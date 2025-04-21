@@ -1,6 +1,6 @@
-﻿namespace REIstacks.Domain.Common;
+﻿namespace REIstacks.Domain.Events;
 
-// No MediatR dependency
+
 public interface IDomainEvent
 {
     DateTime OccurredOn { get; }

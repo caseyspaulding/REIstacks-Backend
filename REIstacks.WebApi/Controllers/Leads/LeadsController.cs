@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using REIstacks.Application.Contracts.Requests;
+using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Application.Repositories.Interfaces;
 using REIstacks.Domain.Entities.CRM;
 using System.Security.Claims;
@@ -9,20 +10,50 @@ namespace REIstacks.Api.Controllers.Leads
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LeadsController : ControllerBase
+    public class LeadsController : TenantController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
+        private readonly ILeadsImportService _leadService;
 
         public LeadsController(
             IUnitOfWork unitOfWork,
             IConfiguration configuration,
+            ILeadsImportService leadService,
             IHttpClientFactory httpClientFactory)
         {
+            _leadService = leadService;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
             _httpClient = httpClientFactory.CreateClient();
+        }
+
+        [HttpPut("{id:int}/assign")]
+        public async Task<IActionResult> Assign(int id, [FromBody] AssignLeadRequest req)
+        {
+            var ok = await _leadService.AssignLeadAsync(id, req.ProfileId, OrgId);
+            return ok
+                ? NoContent()
+                : NotFound(new { error = "Lead not found or not in your org." });
+        }
+
+
+        [HttpGet("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> GetById(int id)
+        {
+            // grab the tenant/org from the JWT
+            var orgId = User.FindFirstValue("organization_id");
+            if (string.IsNullOrEmpty(orgId))
+                return Unauthorized();
+
+            // fetch the lead
+            var lead = await _unitOfWork.Leads.GetByIdAsync(id);
+            if (lead == null || lead.OrganizationId != orgId)
+                return NotFound();
+
+            return Ok(lead);
         }
 
         [HttpPost]

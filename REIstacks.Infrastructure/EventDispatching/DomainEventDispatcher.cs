@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using REIstacks.Application.Common;
-using REIstacks.Application.Common.EventHandlers;
-using REIstacks.Domain.Common;
+using REIstacks.Application.Interfaces.IEventHandlers;
+using REIstacks.Domain.Events;
 
 namespace REIstacks.Infrastructure.EventDispatching;
 

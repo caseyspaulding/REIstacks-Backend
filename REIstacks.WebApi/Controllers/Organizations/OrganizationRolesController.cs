@@ -29,7 +29,7 @@ public class OrganizationRolesController : ControllerBase
         if (!await UserHasAccessToOrg(organizationId))
             return Forbid();
 
-        var roles = await _unitOfWork.organizationRoleRepository.GetByOrganizationIdAsync(organizationId);
+        var roles = await _unitOfWork.OrganizationRoles.GetByOrganizationIdAsync(organizationId);
         return Ok(roles);
     }
 
@@ -40,7 +40,7 @@ public class OrganizationRolesController : ControllerBase
         if (!await UserHasAccessToOrg(organizationId))
             return Forbid();
 
-        var role = await _unitOfWork.organizationRoleRepository.GetByIdAsync(id);
+        var role = await _unitOfWork.OrganizationRoles.GetByIdAsync(id);
 
         if (role == null || role.OrganizationId != organizationId)
             return NotFound();
@@ -65,7 +65,7 @@ public class OrganizationRolesController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        await _unitOfWork.organizationRoleRepository.AddAsync(role);
+        await _unitOfWork.OrganizationRoles.AddAsync(role);
         await _unitOfWork.CompleteAsync();
 
         return CreatedAtAction(nameof(GetRole), new { organizationId, id = role.Id }, role);
@@ -78,7 +78,7 @@ public class OrganizationRolesController : ControllerBase
         if (!await UserHasAccessToOrg(organizationId, requiredRole: "Admin"))
             return Forbid();
 
-        var role = await _unitOfWork.organizationRoleRepository.GetByIdAsync(id);
+        var role = await _unitOfWork.OrganizationRoles.GetByIdAsync(id);
 
         if (role == null || role.OrganizationId != organizationId)
             return NotFound();
@@ -91,7 +91,7 @@ public class OrganizationRolesController : ControllerBase
         role.Description = request.Description;
         role.UpdatedAt = DateTime.UtcNow;
 
-        _unitOfWork.organizationRoleRepository.Update(role);
+        _unitOfWork.OrganizationRoles.Update(role);
         await _unitOfWork.CompleteAsync();
 
         return Ok(role);
@@ -104,7 +104,7 @@ public class OrganizationRolesController : ControllerBase
         if (!await UserHasAccessToOrg(organizationId, requiredRole: "Admin"))
             return Forbid();
 
-        var role = await _unitOfWork.organizationRoleRepository.GetByIdAsync(id);
+        var role = await _unitOfWork.OrganizationRoles.GetByIdAsync(id);
 
         if (role == null || role.OrganizationId != organizationId)
             return NotFound();
@@ -118,7 +118,7 @@ public class OrganizationRolesController : ControllerBase
         if (usersWithRole.Any())
             return BadRequest("Cannot delete a role that is assigned to users");
 
-        await _unitOfWork.organizationRoleRepository.DeleteAsync(id);
+        await _unitOfWork.OrganizationRoles.DeleteAsync(id);
         await _unitOfWork.CompleteAsync();
 
         return NoContent();
@@ -137,7 +137,7 @@ public class OrganizationRolesController : ControllerBase
 
         if (requiredRole != null)
         {
-            var userRole = await _unitOfWork.organizationRoleRepository.GetByIdAsync(userProfile.OrganizationRoleId ?? 0);
+            var userRole = await _unitOfWork.OrganizationRoles.GetByIdAsync(userProfile.OrganizationRoleId ?? 0);
             return userRole != null && (userRole.Name == requiredRole || userRole.Name == "Owner");
         }
 

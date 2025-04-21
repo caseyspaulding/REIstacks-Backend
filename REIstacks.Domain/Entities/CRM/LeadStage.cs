@@ -1,5 +1,4 @@
-﻿using REIstacks.Domain.Entities.Organizations;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace REIstacks.Domain.Entities.CRM;
@@ -11,8 +10,7 @@ public class LeadStage
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
-    public string OrganizationId { get; set; }
+
 
     [Required]
     [MaxLength(50)]
@@ -23,9 +21,8 @@ public class LeadStage
 
     public bool IsCompleted { get; set; }
 
-    // Navigation properties
-    [ForeignKey("OrganizationId")]
-    public virtual Organization Organization { get; set; }
+
+
 
     public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
 }
