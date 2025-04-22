@@ -21,8 +21,8 @@ builder.Services.AddCors(options =>
                 return host == "reistacks.com" ||
                        host == "www.reistacks.com" ||
                        host.EndsWith(".reistacks.com") ||
-                       host == "localhost" ||
-                       host == "http://localhost:3000";
+                       host == "localhost";
+
             }
             return false;
         })
@@ -107,22 +107,25 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
     });
 
+
+
+
 var app = builder.Build();
-
+app.UseRouting();
 // Configure middleware
-app.UseCors("ReistacksFrontend");
 app.UseHttpsRedirection();
+app.UseCors("ReistacksFrontend");
 
+
+app.UseJwtCookieAuth();     // First process JWT
+
+app.UseAuthentication();    // Then standard auth
+
+app.UseAuthorization();     // Then authorization
 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapOpenApi();
-
-
-app.UseJwtCookieAuth();     // First process JWT
-app.UseAuthentication();    // Then standard auth
-app.UseAuthorization();     // Then authorization
-
 app.MapControllers();
 app.MapGet("/health", () => "Healthy");
 

@@ -2,11 +2,6 @@
 using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Domain.Entities.Deals;
 using REIstacks.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace REIstacks.Infrastructure.Services.CRM;
 public class DealService : IDealService

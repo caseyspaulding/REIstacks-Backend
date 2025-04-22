@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using REIstacks.Api.Controllers;
 using REIstacks.Application.Interfaces.IServices;
 using REIstacks.Domain.Entities.Deals;
-using System.Security.Cryptography;
 
 [ApiController]
 [Route("api/deals")]

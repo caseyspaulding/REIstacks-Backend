@@ -1,5 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+// add this:
+using System.Text.Json.Serialization;
+
 namespace REIstacks.Domain.Entities.CRM
 {
     [Table("skip_trace_items")]
@@ -19,45 +22,45 @@ namespace REIstacks.Domain.Entities.CRM
         public string FirstName { get; set; }
 
         [MaxLength(100)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [MaxLength(255)]
-        public string StreetAddress { get; set; }
+        public string? StreetAddress { get; set; }
 
         [MaxLength(100)]
-        public string City { get; set; }
+        public string? City { get; set; }
 
         [MaxLength(50)]
-        public string State { get; set; }
+        public string? State { get; set; }
 
         [MaxLength(20)]
-        public string ZipCode { get; set; }
+        public string? ZipCode { get; set; }
 
         // Skip trace result fields
         [MaxLength(50)]
         public string MatchStatus { get; set; } = "Unknown"; // Matched, PartialMatch, NoMatch
 
         [MaxLength(50)]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [MaxLength(50)]
-        public string PhoneType { get; set; } // Landline, Mobile, etc.
+        public string? PhoneType { get; set; } // Landline, Mobile, etc.
 
         [MaxLength(150)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [MaxLength(50)]
-        public string DateOfBirth { get; set; }
+        public string? DateOfBirth { get; set; }
 
         // Additional fields if available in API response
         [MaxLength(255)]
-        public string CurrentAddress { get; set; }
+        public string? CurrentAddress { get; set; }
 
         [MaxLength(150)]
-        public string PersonLink { get; set; }
+        public string? PersonLink { get; set; }
 
         [MaxLength(50)]
-        public string Age { get; set; }
+        public string? Age { get; set; }
 
         [Required, MaxLength(50)]
         public string Status { get; set; } = "Pending";    // Pending, InProgress, Completed, Failed
@@ -65,9 +68,10 @@ namespace REIstacks.Domain.Entities.CRM
         [Required, MaxLength(50)]
         public string Category { get; set; } = "Default";  // For breakdown grouping
 
-        public string RawResponseJson { get; set; }        // Store the full JSON result for this item
+        public string? RawResponseJson { get; set; }        // Store the full JSON result for this item
 
         [ForeignKey(nameof(SkipTraceActivityId))]
-        public virtual SkipTraceActivity Activity { get; set; }
+        [JsonIgnore]    // <- prevents the cycle by not serializing back to the parent
+        public virtual SkipTraceActivity? Activity { get; set; }
     }
 }
